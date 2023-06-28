@@ -58,3 +58,5 @@ clean:
 #	rm -f  *.gb *.ihx *.cdb *.adb *.noi *.map
 	rm -f  $(OBJDIR)/*.*
 
+run: all
+	mgba-qt $(OBJDIR)/$(PROJECTNAME).gb

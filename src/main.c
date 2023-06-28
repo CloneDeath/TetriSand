@@ -1,17 +1,27 @@
 #include <gb/gb.h>
-#include <gb/drawing.h>
-#include <stdio.h>
+#include <stdint.h>
+#include "../res/dungeon_map.h"
+#include "../res/dungeon_tiles.h"
 
-int main(){
-    // start screen (press start to continue)
-    gotogxy(3,8); // set text start position
-    gprintf("Press Start...");
-    waitpad(J_START); // wait for start
-    gotogxy(3,8); // reset text start position
-    gprintf("              "); // clear message
+void init_gfx() {
+    // Load Background tiles and then map
+    set_bkg_data(0, 79u, dungeon_tiles);
+    set_bkg_tiles(0, 0, 32u, 32u, dungeon_mapPLN0);
 
-    // display message to screen
-    gotogxy(3,8); // set text start position
-    gprintf("Hello World!"); // print message
+    // Turn the background map on to make it visible
+    SHOW_BKG;
+}
+
+int main(void)
+{
+    init_gfx();
+
+    // Loop forever
+    while(1) {
+        // Game main loop processing goes here
+
+        // Done processing, yield CPU and wait for start of next frame
+        wait_vbl_done();
+    }
     return 0;
 }
