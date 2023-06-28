@@ -1,41 +1,60 @@
-AS = /home/nicholas/Applications/gbdk/bin/lcc -c
-CC = /home/nicholas/Applications/gbdk/bin/lcc -Wa-l -Wl-m
+#
+# A Makefile that compiles all .c and .s files in "src" and "res"
+# subdirectories and places the output in a "obj" subdirectory
+#
 
-project_name = helloworld
+# If you move this project you can change the directory
+# to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
+GBDK_HOME = /home/nicholas/Applications/gbdk/
 
-SRC_DIR := src
-OBJ_DIR := build
-BIN_DIR := build
+LCC = $(GBDK_HOME)bin/lcc
 
-BIN := $(BIN_DIR)/$(project_name).gb
-SRC := $(wildcard $(SRC_DIR)/*.c)
-OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+# You can set flags for LCC here
+# For example, you can uncomment the line below to turn on debug output
+# LCCFLAGS = -debug
 
-all: $(BIN)
+# You can set the name of the .gb ROM file here
+PROJECTNAME    = TetriSand
 
-%.s: %.ms
-	maccer -o $@ $<
+SRCDIR      = src
+OBJDIR      = obj
+RESDIR      = res
+BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
+CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
+ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
+OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 
-$(BIN): $(OBJ) | $(BIN_DIR)
-	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+all:	prepare $(BINS)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+compile.bat: Makefile
+	@echo "REM Automatically generated from Makefile" > compile.bat
+	@make -sn | sed y/\\//\\\\/ | grep -v make >> compile.bat
 
-$(BIN_DIR):
-	mkdir $@
+# Compile .c files in "src/" to .o object files
+$(OBJDIR)/%.o:	$(SRCDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
-ifdef OS
-   RM = del /Q
-   FixPath = $(subst /,\,$1)
-else
-   ifeq ($(shell uname), Linux)
-      RM = rm -f
-      FixPath = $1
-   endif
-endif
+# Compile .c files in "res/" to .o object files
+$(OBJDIR)/%.o:	$(RESDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+# Compile .s assembly files in "src/" to .o object files
+$(OBJDIR)/%.o:	$(SRCDIR)/%.s
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+# If needed, compile .c files in "src/" to .s assembly files
+# (not required if .c is compiled directly to .o)
+$(OBJDIR)/%.s:	$(SRCDIR)/%.c
+	$(LCC) $(LCCFLAGS) -S -o $@ $<
+
+# Link the compiled object files into a .gb ROM file
+$(BINS):	$(OBJS)
+	$(LCC) $(LCCFLAGS) -o $(BINS) $(OBJS)
+
+prepare:
+	mkdir -p $(OBJDIR)
 
 clean:
-	@$(RM) $(BIN_DIR) $(OBJ_DIR)
+#	rm -f  *.gb *.ihx *.cdb *.adb *.noi *.map
+	rm -f  $(OBJDIR)/*.*
 
--include $(OBJ:.o=.d)
