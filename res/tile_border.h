@@ -1,6 +1,6 @@
 /*
 
- BORDER.H
+ TILE_BORDER.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 7
+  Tiles                : 0 to 8
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,14 +22,14 @@
 
 */
 
-#ifndef __border_h_INCLUDE
-#define __border_h_INCLUDE
+#ifndef __tile_border_h_INCLUDE
+#define __tile_border_h_INCLUDE
 
 /* Bank of tiles. */
-#define BorderTilesBank 0
+#define TileBorderBank 0
 /* Start of tile array. */
-extern const unsigned char BorderTiles[];
+extern const unsigned char TileBorder[];
 
 #endif
 
-/* End of BORDER.H */
+/* End of TILE_BORDER.H */
