@@ -1,20 +1,20 @@
 #include <gb/gb.h>
 #include <stdint.h>
-#include "../res/dungeon_map.h"
-#include "../res/dungeon_tiles.h"
-
-void init_gfx() {
-    // Load Background tiles and then map
-    set_bkg_data(0, 79u, dungeon_tiles);
-    set_bkg_tiles(0, 0, 32u, 32u, dungeon_mapPLN0);
-
-    // Turn the background map on to make it visible
-    SHOW_BKG;
-}
+#include <stdbool.h>
+#include "../res/border.h"
 
 int main(void)
 {
-    init_gfx();
+    SHOW_BKG;
+    set_bkg_data(1, 8, BorderTiles);
+    set_bkg_tile_xy(0, 0, 1);
+    set_bkg_tile_xy(1, 0, 2);
+    set_bkg_tile_xy(2, 0, 3);
+    set_bkg_tile_xy(0, 1, 4);
+    set_bkg_tile_xy(2, 1, 5);
+    set_bkg_tile_xy(0, 2, 6);
+    set_bkg_tile_xy(1, 2, 7);
+    set_bkg_tile_xy(2, 2, 8);
 
     // Loop forever
     while(1) {
