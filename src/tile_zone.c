@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <gb/gb.h>
 #include "tile_set.h"
-#include <stdio.h>
 
 void initialize_border_tiles(struct tile_zone* this) {
     this->border_tiles = alloc_tile_set(9);
@@ -30,23 +29,17 @@ void initialize_inner_tiles(struct tile_zone* this) {
     uint8_t inner_height = this->height - 2;
     uint8_t nb_tiles = inner_width * inner_height;
     this->inner_tiles = alloc_tile_set(nb_tiles);
-    size_t size = nb_tiles * sizeof(uint8_t) * 12;
-    this->inner_tile_data = (uint8_t*)calloc(nb_tiles, sizeof(uint8_t) * 12);
 
-    printf("s: 0x%x\n", size);
-    printf("d: 0x%x\n", this->inner_tile_data);
-
-    for (uint16_t z = 0; z < 16 * nb_tiles; z++) {
-        this->inner_tile_data[z] = 0;
-        //printf("d: %hu\n", (unsigned char )data[z]);
+    for (uint16_t z = 0; z < nb_tiles; z++) {
+        const uint8_t zero[] = {
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00
+        };
+        set_bkg_data(this->inner_tiles->start + z, 1, zero);
     }
 
-    //printf("num_tiles: %hu\n", (unsigned char )nb_tiles);
-    //printf("start: %hu\n", (unsigned char )this->inner_tiles->start);
-    //printf("count: %hu\n", (unsigned char )this->inner_tiles->count);
-    return;
-
-    set_bkg_data(this->inner_tiles->start, nb_tiles, this->inner_tile_data);
 
     for (uint8_t x = 0; x < inner_width; x++) {
         for (uint8_t y = 0; y < inner_height; y++) {
@@ -70,7 +63,6 @@ struct tile_zone* new_tile_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 }
 
 void delete_tile_zone(struct tile_zone* this) {
-    free(this->inner_tile_data);
     free_tile_set(this->inner_tiles);
     free_tile_set(this->border_tiles);
     free(this);
