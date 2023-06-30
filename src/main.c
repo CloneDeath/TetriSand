@@ -5,9 +5,8 @@
 int main(void)
 {
     SHOW_BKG;
-    struct tile_zone* tz = new_tile_zone(0, 0, 10, 10);
+    struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
 
-    // Loop forever
     while(1) {
         // Game main loop processing goes here
 
