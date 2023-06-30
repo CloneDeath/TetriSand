@@ -68,6 +68,23 @@ void delete_tile_zone(struct tile_zone* this) {
     free(this);
 }
 
+uint8_t get_bit(uint8_t tile_index, uint8_t x, uint8_t y) {
+    static uint8_t tile_data[16];
+    get_bkg_data(tile_index, 1, tile_data);
+    uint8_t rowL = tile_data[y * 2 + 0];
+    uint8_t rowH = tile_data[y * 2 + 1];
+
+    // Extract the bits corresponding to the pixel at position (x, y)
+    uint8_t lowerBit = (rowL >> (7 - x)) & 1;
+    uint8_t upperBit = (rowH >> (7 - x)) & 1;
+
+    // Combine the bits to get the color value
+    uint8_t value = (upperBit << 1) | lowerBit;
+
+    // Return the pixel value
+    return value;
+}
+
 void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
     static uint8_t tile_data[16];
     get_bkg_data(tile_index, 1, tile_data);
@@ -92,6 +109,17 @@ void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
     set_bkg_data(tile_index, 1, tile_data);
 }
 
+uint8_t get_sand(struct tile_zone* this, uint8_t x, uint8_t y) {
+    uint8_t tile_width = this->width - 2;
+    uint8_t tile_x = x / 8;
+    uint8_t tile_y = y / 8;
+    uint8_t tile_offset = tile_width * tile_y + tile_x;
+    uint8_t tile_index = this->inner_tiles->start + tile_offset;
+    uint8_t pixel_x = x % 8;
+    uint8_t pixel_y = y % 8;
+    return get_bit(tile_index, pixel_x, pixel_y);
+}
+
 void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
@@ -101,4 +129,20 @@ void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y % 8;
     set_bit(tile_index, pixel_x, pixel_y, value);
+}
+void update_sand(struct tile_zone* this) {
+    uint8_t height = (this->height - 2) * 8;
+    uint8_t width = (this->width - 2) * 8;
+    for (uint8_t y = height - 1; y > 0; y--) {
+        for (uint8_t x = 0; x < width; x++) {
+            uint8_t sand = get_sand(this, x, y);
+            if (sand) continue;
+
+            uint8_t sand_above = get_sand(this, x, y - 1);
+            if (sand_above) {
+                set_sand(this, x, y, sand_above);
+                set_sand(this, x, y - 1, 0);
+            }
+        }
+    }
 }
