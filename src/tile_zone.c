@@ -67,3 +67,38 @@ void delete_tile_zone(struct tile_zone* this) {
     free_tile_set(this->border_tiles);
     free(this);
 }
+
+void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
+    static uint8_t tile_data[16];
+    get_bkg_data(tile_index, 1, tile_data);
+    uint8_t rowL = tile_data[y * 2 + 0];
+    uint8_t rowH = tile_data[y * 2 + 1];
+
+    // Limit value to two bits (0-3)
+    value &= 3;
+
+    // Clear the bits
+    rowL &= ~(1 << (7 - x));
+    rowH &= ~(1 << (7 - x));
+
+    // Set the new bits
+    rowL |= (value & 1) << (7 - x);
+    rowH |= (value >> 1) << (7 - x);
+
+    // Store the modified bytes back into the tile data
+    tile_data[y * 2 + 0] = rowL;
+    tile_data[y * 2 + 1] = rowH;
+
+    set_bkg_data(tile_index, 1, tile_data);
+}
+
+void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+    uint8_t tile_width = this->width - 2;
+    uint8_t tile_x = x / 8;
+    uint8_t tile_y = y / 8;
+    uint8_t tile_offset = tile_width * tile_y + tile_x;
+    uint8_t tile_index = this->inner_tiles->start + tile_offset;
+    uint8_t pixel_x = x % 8;
+    uint8_t pixel_y = y % 8;
+    set_bit(tile_index, pixel_x, pixel_y, value);
+}
