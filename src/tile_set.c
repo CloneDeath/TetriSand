@@ -2,24 +2,25 @@
 #include "stdlib.h"
 #include "stdbool.h"
 
-bool tile_is_available[127];
+#define MAX_TILES 256
+bool tile_in_use[MAX_TILES];
 
 bool is_range_available(uint8_t start, uint8_t count) {
     for (uint8_t i = start; i < start + count; i++) {
-        bool available = tile_is_available[i];
-        if (!available) return false;
+        bool in_use = tile_in_use[i];
+        if (in_use) return false;
     }
     return true;
 }
 
 void reserve_range(uint8_t start, uint8_t count) {
     for (uint8_t i = start; i < start + count; i++) {
-        tile_is_available[i] = false;
+        tile_in_use[i] = true;
     }
 }
 
 void reserve_tiles(struct tile_set* tiles, uint8_t nb_tiles) {
-    for (uint8_t i = 0; i < 127; i++){
+    for (uint8_t i = 0; i < MAX_TILES; i++){
         bool available = is_range_available(i, nb_tiles);
         if (!available) continue;
 
@@ -38,7 +39,7 @@ struct tile_set* alloc_tile_set(uint8_t nb_tiles) {
 
 void free_range(uint8_t start, uint8_t count) {
     for (uint8_t i = start; i < start + count; i++) {
-        tile_is_available[i] = true;
+        tile_in_use[i] = false;
     }
 }
 

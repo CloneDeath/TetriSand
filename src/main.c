@@ -1,10 +1,10 @@
 #include <gb/gb.h>
-#include <stdbool.h>
 #include "tile_zone.h"
 
 int main(void)
 {
     SHOW_BKG;
+
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
 
     while(1) {

@@ -1,8 +1,60 @@
 #include "tile_zone.h"
 #include "../res/tile_border.h"
-#include "stdlib.h"
+#include <stdlib.h>
 #include <gb/gb.h>
 #include "tile_set.h"
+#include <stdio.h>
+
+void initialize_border_tiles(struct tile_zone* this) {
+    this->border_tiles = alloc_tile_set(9);
+
+    set_bkg_data(this->border_tiles->start, this->border_tiles->count, TileBorder);
+
+    set_bkg_tile_xy(this->x, this->y, this->border_tiles->start + 0); // Top-Left
+    set_bkg_tile_xy(this->x + this->width - 1, this->y, this->border_tiles->start + 2); // Top-Right
+    set_bkg_tile_xy(this->x, this->y + this->height - 1, this->border_tiles->start + 5); // Bottom-Left
+    set_bkg_tile_xy(this->x + this->width - 1, this->y + this->height - 1, this->border_tiles->start + 7); // Bottom-Right
+
+    for (uint8_t i = 1; i < this->width-1; i++){
+        set_bkg_tile_xy(this->x + i, this->y, this->border_tiles->start + 1); // Top
+        set_bkg_tile_xy(this->x + i, this->y + this->height - 1, this->border_tiles->start + 6); // Bottom
+    }
+    for (uint8_t i = 1; i < this->height-1; i++){
+        set_bkg_tile_xy(this->x, this->y + i, this->border_tiles->start + 3); // Left
+        set_bkg_tile_xy(this->x + this->width - 1, this->y + i, this->border_tiles->start + 4); // Right
+    }
+}
+
+void initialize_inner_tiles(struct tile_zone* this) {
+    uint8_t inner_width = this->width - 2;
+    uint8_t inner_height = this->height - 2;
+    uint8_t nb_tiles = inner_width * inner_height;
+    this->inner_tiles = alloc_tile_set(nb_tiles);
+    size_t size = nb_tiles * sizeof(uint8_t) * 12;
+    this->inner_tile_data = (uint8_t*)calloc(nb_tiles, sizeof(uint8_t) * 12);
+
+    printf("s: 0x%x\n", size);
+    printf("d: 0x%x\n", this->inner_tile_data);
+
+    for (uint16_t z = 0; z < 16 * nb_tiles; z++) {
+        this->inner_tile_data[z] = 0;
+        //printf("d: %hu\n", (unsigned char )data[z]);
+    }
+
+    //printf("num_tiles: %hu\n", (unsigned char )nb_tiles);
+    //printf("start: %hu\n", (unsigned char )this->inner_tiles->start);
+    //printf("count: %hu\n", (unsigned char )this->inner_tiles->count);
+    return;
+
+    set_bkg_data(this->inner_tiles->start, nb_tiles, this->inner_tile_data);
+
+    for (uint8_t x = 0; x < inner_width; x++) {
+        for (uint8_t y = 0; y < inner_height; y++) {
+            uint8_t tile_offset = y * inner_width + x;
+            set_bkg_tile_xy(this->x + x + 1, this->y + y + 1, this->inner_tiles->start + tile_offset);
+        }
+    }
+}
 
 struct tile_zone* new_tile_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     struct tile_zone* tz = (struct tile_zone*)malloc(sizeof(struct tile_zone));
@@ -10,28 +62,16 @@ struct tile_zone* new_tile_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
     tz->y = y;
     tz->width = width;
     tz->height = height;
-    tz->border_tiles = alloc_tile_set(9);
 
-    set_bkg_data(tz->border_tiles->start, tz->border_tiles->count, TileBorder);
-
-    set_bkg_tile_xy(x, y, tz->border_tiles->start + 0); // Top-Left
-    set_bkg_tile_xy(x + width - 1, y, tz->border_tiles->start + 2); // Top-Right
-    set_bkg_tile_xy(x, y + height - 1, tz->border_tiles->start + 5); // Bottom-Left
-    set_bkg_tile_xy(x + width - 1, y + height - 1, tz->border_tiles->start + 7); // Bottom-Right
-
-    for (uint8_t i = 1; i < width-1; i++){
-        set_bkg_tile_xy(x + i, y, tz->border_tiles->start + 1); // Top
-        set_bkg_tile_xy(x + i, y + height - 1, tz->border_tiles->start + 6); // Bottom
-    }
-    for (uint8_t i = 1; i < height-1; i++){
-        set_bkg_tile_xy(x, y + i, tz->border_tiles->start + 3); // Left
-        set_bkg_tile_xy(x + width - 1, y + i, tz->border_tiles->start + 4); // Right
-    }
+    initialize_border_tiles(tz);
+    initialize_inner_tiles(tz);
 
     return tz;
 }
 
 void delete_tile_zone(struct tile_zone* this) {
+    free(this->inner_tile_data);
+    free_tile_set(this->inner_tiles);
     free_tile_set(this->border_tiles);
     free(this);
 }
