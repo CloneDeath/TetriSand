@@ -163,16 +163,16 @@ static inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_
     set_bit(tile_index, pixel_x, pixel_y, value);
 }
 
-static inline void _set_sand_chain(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
-    for (uint8_t i = 0; i < height; i++) {
-        set_sand(this, x, y + i, value);
-    }
-}
-
 static inline void _move_chain_down(struct tile_zone* this, uint8_t x, struct sand_chain* chain) {
     chain->y -= 1;
     set_sand(this, x, chain->y, chain->value);
     set_sand(this, x, chain->y + chain->length, DMG_WHITE);
+}
+
+static void _set_sand_chain(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
+    for (uint8_t i = 0; i < height; i++) {
+        set_sand(this, x, y + i, value);
+    }
 }
 
 static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x, struct sand_chain* dest) {

@@ -14,10 +14,11 @@ int main(void)
 
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
 
-    // add_square(tz, 0, 16, 8, 3);
-    // add_square(tz, 0, 32, 4, 2);
-    // add_square(tz, 0, 28, 1, 1);
-    add_square(tz, 1, 0, 2, 3);
+    add_square(tz, 0, 16, 8, 3);
+    add_square(tz, 0, 32, 4, 2);
+    add_square(tz, 0, 28, 1, 1);
+
+    //add_square(tz, 1, 0, 2, 3);
 
     while(true) {
         update_sand(tz);
