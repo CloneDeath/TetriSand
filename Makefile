@@ -12,7 +12,10 @@ EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
 LCC = $(GBDK_HOME)bin/lcc
 
 # You can set flags for LCC here
-LCCFLAGS = -Wm-yc
+# -Wf--debug : Enable Debug
+# -Wl-y : Enable CDB file generation for debugging
+# -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
+LCCFLAGS = -Wm-yc -Wf--debug -Wl-y -Wl-w -Wl-m
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
