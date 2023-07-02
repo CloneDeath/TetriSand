@@ -7,7 +7,15 @@ int main(void)
 
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
 
-    set_sand(tz, 0, 0, 3);
+    add_sand(tz, 0, 16, 8, 3);
+    add_sand(tz, 1, 16, 8, 3);
+    add_sand(tz, 2, 16, 8, 3);
+    add_sand(tz, 3, 16, 8, 3);
+    add_sand(tz, 4, 16, 8, 3);
+    add_sand(tz, 5, 16, 8, 3);
+    add_sand(tz, 6, 16, 8, 3);
+    add_sand(tz, 7, 16, 8, 3);
+    add_sand(tz, 8, 16, 8, 3);
 
     while(1) {
         update_sand(tz);

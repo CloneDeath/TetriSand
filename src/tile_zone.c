@@ -60,6 +60,8 @@ struct tile_zone* new_tile_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
     initialize_border_tiles(tz);
     initialize_inner_tiles(tz);
 
+    tz->sand_chains = calloc((tz->width - 2) * 8, sizeof(struct sand_chain));
+
     return tz;
 }
 
@@ -146,7 +148,7 @@ static inline uint8_t get_sand(struct tile_zone* this, uint8_t x, uint8_t y) {
     return get_bit(tile_index, pixel_x, pixel_y);
 }
 
-inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+static inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
     uint8_t tile_y = y / 8;
@@ -161,18 +163,23 @@ void update_sand(struct tile_zone* this) {
     uint8_t height = (this->height - 2) * 8;
     uint8_t width = (this->width - 2) * 8;
 
-    for (uint8_t y = height - 1; y > 0; y--) {
-        for (uint8_t x = 0; x < width; x++) {
-            uint8_t sand = get_sand(this, x, y);
-            if (sand) continue;
-
-            uint8_t sand_above = get_sand(this, x, y - 1);
-            if (sand_above) {
-                set_sand(this, x, y-1, 0);
-                set_sand(this, x, y, sand_above);
-            }
-        }
+    for (uint8_t x = 0; x < width; x++) {
+        struct sand_chain *chain = &this->sand_chains[x];
+        if (chain->length == 0) continue;
+        if (chain->y >= height - 1) continue;
+        chain->y += 1;
+        set_sand(this, x, chain->y, chain->value);
+        set_sand(this, x, chain->y - chain->length, DMG_WHITE);
     }
 
     save_and_clear_cache();
+}
+
+void add_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
+    struct sand_chain *chain = &this->sand_chains[x];
+    if (chain->length == 0) {
+        chain->length = length;
+        chain->value = value;
+        chain->y = y;
+    }
 }
