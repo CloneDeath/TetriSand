@@ -64,6 +64,7 @@ struct sand_chain* sand_chain__split(struct sand_chain* this, uint8_t split_afte
     struct sand_chain* next = new_sand_chain(this->y + split_after, this->length - split_after, this->value);
     next->next = this->next;
     this->next = next;
+    this->length = split_after;
     return next;
 }
 

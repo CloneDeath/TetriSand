@@ -176,31 +176,29 @@ static void _set_sand_chain(struct tile_zone* this, uint8_t x, uint8_t y, uint8_
 }
 
 static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x, struct sand_chain* dest) {
-    uint8_t target_y = dest->y + dest->length;
     struct sand_chain* current = &this->sand_chains[x];
     if (current->length == 0) return;
-    if (current->y == 0 && current->length - 1 > target_y) {
-        uint8_t amount_to_stay = target_y + 1;
-        struct sand_chain* split = sand_chain__split(current, amount_to_stay);
-        struct sand_chain* split_end = sand_chain__get_last_connected(split);
-        uint8_t length = split_end->y + split_end->length - split->y;
-        _set_sand_chain(this, x, split->y, length, 0);
-        _set_sand_chain(this, new_x, target_y, length, split->value);
-        current->next = split_end->next;
-        split_end->next = dest->next;
-        dest->next = split;
-        split->y = target_y;
-        return;
-    }
-}
 
-static inline void _slide_sand(struct tile_zone* this, uint8_t x, struct sand_chain* dest) {
-    if (x-1 >= 0) {
-        _slide_sand_chain(this, x - 1, x, dest);
-    }
-    uint8_t width = (this->width-2) * 8;
-    if (x+1 < width) {
-        _slide_sand_chain(this, x + 1, x, dest);
+    uint8_t target_y = dest->y + dest->length;
+    uint8_t stable_floor = 0;
+
+    while (current != NULL) {
+        if (current->y > stable_floor) return;
+        if (current->length - 1 > target_y) {
+            uint8_t amount_to_stay = (target_y - current->y) + 1;
+            struct sand_chain *split = sand_chain__split(current, amount_to_stay);
+            struct sand_chain *split_end = sand_chain__get_last_connected(split);
+            uint8_t length = split_end->y + split_end->length - split->y;
+            _set_sand_chain(this, x, split->y, length, 0);
+            _set_sand_chain(this, new_x, target_y, length, split->value);
+            current->next = split_end->next;
+            split_end->next = dest->next;
+            dest->next = split;
+            split->y = target_y;
+            return;
+        }
+        stable_floor += current->length;
+        current = current->next;
     }
 }
 
@@ -251,10 +249,16 @@ void update_sand(struct tile_zone* this) {
         }
     }
 
-    for (uint8_t x = 0; x < width; x++) {
+    for (uint8_t x = 0; x < width - 1; x++) {
         struct sand_chain *chain = &this->sand_chains[x];
         struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
-        _slide_sand(this, x, last_connected);
+        _slide_sand_chain(this, x + 1, x, last_connected);
+    }
+
+    for (uint8_t x = width - 1; x > 1; x--) {
+        struct sand_chain *chain = &this->sand_chains[x];
+        struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
+        _slide_sand_chain(this, x - 1, x, last_connected);
     }
 
     save_and_clear_cache();
