@@ -194,21 +194,11 @@ void update_sand(struct tile_zone* this) {
 }
 
 void add_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
-    for (uint8_t y_at = y; y_at < y + length; y_at++){
+    struct sand_chain* chain = &this->sand_chains[x];
+    struct sand_chain* new_chain = chain__add_chain(chain, y, length, value);
+
+    for (uint8_t y_at = new_chain->y; y_at < new_chain->y + new_chain->length; y_at++){
         set_sand(this, x, y_at, value);
     }
     save_and_clear_cache();
-
-    struct sand_chain *chain = &this->sand_chains[x];
-    if (chain->length == 0) {
-        chain->length = length;
-        chain->value = value;
-        chain->y = y;
-        return;
-    }
-
-    if (!chain->next) {
-        chain->next = new_sand_chain(y, length, value);
-        return;
-    }
 }

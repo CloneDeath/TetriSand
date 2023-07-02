@@ -18,10 +18,12 @@ int main(void)
     add_sand(tz, 7, 16, 8, 3);
     add_sand(tz, 8, 16, 8, 3);
 
-    add_sand(tz, 0, 24, 4, 2);
-    add_sand(tz, 1, 24, 4, 2);
-    add_sand(tz, 2, 24, 4, 2);
-    add_sand(tz, 3, 24, 4, 2);
+    add_sand(tz, 0, 32, 4, 2);
+    add_sand(tz, 1, 32, 4, 2);
+    add_sand(tz, 2, 32, 4, 2);
+    add_sand(tz, 3, 32, 4, 2);
+
+    add_sand(tz, 0, 28, 1, 1);
 
     while(true) {
         update_sand(tz);
@@ -30,6 +32,6 @@ int main(void)
         wait_vbl_done();
     }
 
-    delete_tile_zone(tz);
-    return 0;
+    // delete_tile_zone(tz);
+    // return 0;
 }
