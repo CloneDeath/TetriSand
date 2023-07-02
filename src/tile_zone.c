@@ -130,19 +130,60 @@ void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t pixel_y = y % 8;
     set_bit(tile_index, pixel_x, pixel_y, value);
 }
+
 void update_sand(struct tile_zone* this) {
+    static uint8_t tile_data[16];
+
+    uint8_t tile_width = this->width - 2;
     uint8_t height = (this->height - 2) * 8;
-    uint8_t width = (this->width - 2) * 8;
+    uint8_t width = tile_width * 8;
+    uint8_t current_tile_index = 255; // Invalid tile index
+
     for (uint8_t y = height - 1; y > 0; y--) {
         for (uint8_t x = 0; x < width; x++) {
-            uint8_t sand = get_sand(this, x, y);
-            if (sand) continue;
+            uint8_t tile_x = x / 8;
+            uint8_t tile_y = y / 8;
+            uint8_t tile_offset = tile_width * tile_y + tile_x;
+            uint8_t tile_index = this->inner_tiles->start + tile_offset;
 
-            uint8_t sand_above = get_sand(this, x, y - 1);
-            if (sand_above) {
-                set_sand(this, x, y, sand_above);
-                set_sand(this, x, y - 1, 0);
+            // Load new tile data if we've moved to a different tile
+            if (tile_index != current_tile_index) {
+                // Save the modified data of the current tile before loading new tile
+                if (current_tile_index != 255) {
+                    set_bkg_data(current_tile_index, 1, tile_data);
+                }
+                // Load the new tile data
+                get_bkg_data(tile_index, 1, tile_data);
+                current_tile_index = tile_index;
+            }
+
+            uint8_t pixel_x = x % 8;
+            uint8_t pixel_y = y % 8;
+
+            uint8_t lowerBit = (tile_data[pixel_y * 2] >> (7 - pixel_x)) & 1;
+            uint8_t upperBit = (tile_data[pixel_y * 2 + 1] >> (7 - pixel_x)) & 1;
+            uint8_t sand = (upperBit << 1) | lowerBit;
+
+            if (!sand) {
+                uint8_t above_lowerBit = (tile_data[(pixel_y - 1) * 2] >> (7 - pixel_x)) & 1;
+                uint8_t above_upperBit = (tile_data[(pixel_y - 1) * 2 + 1] >> (7 - pixel_x)) & 1;
+                uint8_t sand_above = (above_upperBit << 1) | above_lowerBit;
+
+                if (sand_above) {
+                    // Swap the sand above to the current position
+                    tile_data[pixel_y * 2] |= (1 << (7 - pixel_x)); // set bit
+                    tile_data[pixel_y * 2 + 1] |= (1 << (7 - pixel_x)); // set bit
+
+                    // Clear the bit in the position above since the sand fell down
+                    tile_data[(pixel_y - 1) * 2] &= ~(1 << (7 - pixel_x)); // clear bit
+                    tile_data[(pixel_y - 1) * 2 + 1] &= ~(1 << (7 - pixel_x)); // clear bit
+                }
             }
         }
+    }
+
+    // Save the data of the last tile
+    if (current_tile_index != 255) {
+        set_bkg_data(current_tile_index, 1, tile_data);
     }
 }
