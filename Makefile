@@ -6,6 +6,8 @@
 # If you move this project you can change the directory
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /home/nicholas/Applications/gbdk/
+EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
+#EMULATOR = mgba-qt
 
 LCC = $(GBDK_HOME)bin/lcc
 
@@ -54,8 +56,7 @@ prepare:
 	mkdir -p $(OBJDIR)
 
 clean:
-#	rm -f  *.gb *.ihx *.cdb *.adb *.noi *.map
 	rm -f  $(OBJDIR)/*.*
 
 run: all
-	mgba-qt $(OBJDIR)/$(PROJECTNAME).gb
+	$(EMULATOR) $(OBJDIR)/$(PROJECTNAME).gb
