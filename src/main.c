@@ -1,5 +1,6 @@
 #include <gb/gb.h>
 #include "tile_zone.h"
+#include <stdbool.h>
 
 int main(void)
 {
@@ -17,7 +18,12 @@ int main(void)
     add_sand(tz, 7, 16, 8, 3);
     add_sand(tz, 8, 16, 8, 3);
 
-    while(1) {
+    add_sand(tz, 0, 24, 4, 2);
+    add_sand(tz, 1, 24, 4, 2);
+    add_sand(tz, 2, 24, 4, 2);
+    add_sand(tz, 3, 24, 4, 2);
+
+    while(true) {
         update_sand(tz);
 
         // Done processing, yield CPU and wait for start of next frame

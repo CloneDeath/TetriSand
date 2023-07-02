@@ -138,48 +138,77 @@ static inline void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t val
 }
 
 static inline uint8_t get_sand(struct tile_zone* this, uint8_t x, uint8_t y) {
+    uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
+
     uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
-    uint8_t tile_y = y / 8;
+    uint8_t tile_y = y_flipped / 8;
     uint8_t tile_offset = tile_width * tile_y + tile_x;
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
-    uint8_t pixel_y = y % 8;
+    uint8_t pixel_y = y_flipped % 8;
     return get_bit(tile_index, pixel_x, pixel_y);
 }
 
 static inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+    uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
+
     uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
-    uint8_t tile_y = y / 8;
+    uint8_t tile_y = y_flipped / 8;
     uint8_t tile_offset = tile_width * tile_y + tile_x;
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
-    uint8_t pixel_y = y % 8;
+    uint8_t pixel_y = y_flipped % 8;
     set_bit(tile_index, pixel_x, pixel_y, value);
 }
 
+static inline void move_chain_down(struct tile_zone* this, uint8_t x, struct sand_chain* chain) {
+    chain->y -= 1;
+    set_sand(this, x, chain->y, chain->value);
+    set_sand(this, x, chain->y + chain->length, DMG_WHITE);
+}
+
 void update_sand(struct tile_zone* this) {
-    uint8_t height = (this->height - 2) * 8;
     uint8_t width = (this->width - 2) * 8;
 
     for (uint8_t x = 0; x < width; x++) {
         struct sand_chain *chain = &this->sand_chains[x];
         if (chain->length == 0) continue;
-        if (chain->y >= height - 1) continue;
-        chain->y += 1;
-        set_sand(this, x, chain->y, chain->value);
-        set_sand(this, x, chain->y - chain->length, DMG_WHITE);
+        if (chain->y > 0) {
+            move_chain_down(this, x, chain);
+        }
+
+        struct sand_chain *prev_chain = chain;
+        chain = chain->next;
+        while (chain) {
+            if (chain->y > prev_chain->y + prev_chain->length) {
+                move_chain_down(this, x, chain);
+            }
+            prev_chain = chain;
+            chain = chain->next;
+        }
     }
 
     save_and_clear_cache();
 }
 
 void add_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
+    for (uint8_t y_at = y; y_at < y + length; y_at++){
+        set_sand(this, x, y_at, value);
+    }
+    save_and_clear_cache();
+
     struct sand_chain *chain = &this->sand_chains[x];
     if (chain->length == 0) {
         chain->length = length;
         chain->value = value;
         chain->y = y;
+        return;
+    }
+
+    if (!chain->next) {
+        chain->next = new_sand_chain(y, length, value);
+        return;
     }
 }
