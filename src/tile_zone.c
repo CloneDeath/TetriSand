@@ -158,14 +158,13 @@ inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value
 }
 
 void update_sand(struct tile_zone* this) {
-    uint8_t tile_width = this->width - 2;
     uint8_t height = (this->height - 2) * 8;
-    uint8_t width = tile_width * 8;
+    uint8_t width = (this->width - 2) * 8;
 
     for (uint8_t y = height - 1; y > 0; y--) {
         for (uint8_t x = 0; x < width; x++) {
             uint8_t sand = get_sand(this, x, y);
-            if (!sand) continue;
+            if (sand) continue;
 
             uint8_t sand_above = get_sand(this, x, y - 1);
             if (sand_above) {
