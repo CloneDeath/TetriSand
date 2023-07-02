@@ -11,7 +11,16 @@ struct sand_chain*  new_sand_chain(uint8_t y, uint8_t length, uint8_t value) {
     return chain;
 }
 
-struct sand_chain* chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
+void free_sand_chain(struct sand_chain* this) {
+    struct sand_chain* current = this;
+    while (current != NULL) {
+        struct sand_chain* next = current->next;
+        free(current);
+        current = next;
+    }
+}
+
+struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
     if (this->length == 0) {
         this->length = length;
         this->value = value;
@@ -49,4 +58,24 @@ struct sand_chain* chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t 
         current = current->next;
     }
     return NULL;
+}
+
+struct sand_chain* sand_chain__split(struct sand_chain* this, uint8_t split_after) {
+    struct sand_chain* next = new_sand_chain(this->y + split_after, this->length - split_after, this->value);
+    next->next = this->next;
+    this->next = next;
+    return next;
+}
+
+struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
+    struct sand_chain* previous = this;
+    struct sand_chain* current = this->next;
+    while (current != NULL) {
+        if (current->y > previous->y + previous->length) {
+            return previous;
+        }
+        previous = current;
+        current = current->next;
+    }
+    return previous;
 }
