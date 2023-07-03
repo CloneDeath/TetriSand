@@ -176,10 +176,26 @@ static void _set_sand_color_column(struct tile_zone* this, uint8_t x, uint8_t y,
     }
 }
 
-static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x, struct sand_chain* dest) {
+static inline struct sand_chain* _get_or_create_destination_chain(struct tile_zone* this, uint8_t x){
+    struct sand_chain *chain = &this->sand_chains[x];
+    if (chain->y > 0) {
+        struct sand_chain* root = copy_sand_chain(chain);
+        chain->next = root;
+        chain->y = 0;
+        chain->length = 0;
+        chain->value = 0;
+        return chain;
+    }
+    struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
+    return last_connected;
+}
+
+static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x) {
     struct sand_chain* current = &this->sand_chains[x];
     if (current->length == 0) return;
     if (current->y > 0) return; // sand-chain is still falling
+
+    struct sand_chain* dest = _get_or_create_destination_chain(this, new_x);
 
     uint8_t target_y = dest->y + dest->length;
     uint8_t target_gap = sand_chain__get_gap_above(dest);
@@ -256,15 +272,11 @@ void update_sand(struct tile_zone* this) {
     }
 
     for (uint8_t x = 0; x < width - 1; x++) {
-        struct sand_chain *chain = &this->sand_chains[x];
-        struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
-        _slide_sand_chain(this, x + 1, x, last_connected);
+        _slide_sand_chain(this, x + 1, x);
     }
 
     for (uint8_t x = width - 1; x > 0; x--) {
-        struct sand_chain *chain = &this->sand_chains[x];
-        struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
-        _slide_sand_chain(this, x - 1, x, last_connected);
+        _slide_sand_chain(this, x - 1, x);
     }
 
     _save_and_clear_tile_colors_cache();

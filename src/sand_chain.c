@@ -2,12 +2,21 @@
 #include "stdlib.h"
 #include "stdbool.h"
 
-struct sand_chain*  new_sand_chain(uint8_t y, uint8_t length, uint8_t value) {
+struct sand_chain* new_sand_chain(uint8_t y, uint8_t length, uint8_t value) {
     struct sand_chain* chain = malloc(sizeof(struct sand_chain));
     chain->y = y;
     chain->length = length;
     chain->value = value;
     chain->next = NULL;
+    return chain;
+}
+
+struct sand_chain* copy_sand_chain(struct sand_chain* copy) {
+    struct sand_chain* chain = malloc(sizeof(struct sand_chain));
+    chain->y = copy->y;
+    chain->length = copy->length;
+    chain->value = copy->value;
+    chain->next = copy->next;
     return chain;
 }
 
