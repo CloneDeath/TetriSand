@@ -2,19 +2,27 @@
 #include <stdint.h>
 #include <stdio.h>
 
+int8_t assert_number = -1;
 bool assertion_failed;
 uint8_t passed = 0;
 uint8_t failed = 0;
 
 void ASSERT(bool is_true) {
-    if (!is_true) assertion_failed = true;
+    if (assertion_failed) return;
+    assert_number++;
+
+    if (!is_true) {
+        assertion_failed = true;
+    }
 }
 
 void _run_test(struct test this) {
+    assert_number = -1;
     assertion_failed = false;
     this.func();
     if (assertion_failed) {
         printf("%s FAILED\n", this.name);
+        printf("ASSERT #%hd\n", assert_number);
         failed++;
     } else {
         passed++;
