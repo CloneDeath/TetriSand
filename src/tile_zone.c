@@ -202,7 +202,7 @@ static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t 
     }
 }
 
-static inline void _collapse_empty_and_similar_chains(struct tile_zone* this) {
+static void _collapse_empty_and_similar_chains(struct tile_zone* this) {
     uint8_t width = (this->width - 2) * 8;
     for (uint8_t x = 0; x < width; x++) {
         struct sand_chain *current = &this->sand_chains[x];
@@ -214,14 +214,16 @@ static inline void _collapse_empty_and_similar_chains(struct tile_zone* this) {
                 current->length = next->length;
                 current->value = next->value;
                 current->next = next->next;
+                next->next = NULL;
+                free_sand_chain(next);
                 continue;
             }
-            if (current->value == next->value && current->y + current->length == next->y) {
+            /*if (current->value == next->value && current->y + current->length == next->y) {
                 current->length += next->length;
                 current->next = next->next;
                 next->next = NULL;
                 free_sand_chain(next);
-            }
+            }*/
             current = current->next;
         }
     }
@@ -248,14 +250,15 @@ void update_sand(struct tile_zone* this) {
             chain = chain->next;
         }
     }
+/*
 
     for (uint8_t x = 0; x < width - 1; x++) {
         struct sand_chain *chain = &this->sand_chains[x];
         struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
         _slide_sand_chain(this, x + 1, x, last_connected);
     }
-
-    for (uint8_t x = width - 1; x > 1; x--) {
+*/
+    for (uint8_t x = width - 1; x > 0; x--) {
         struct sand_chain *chain = &this->sand_chains[x];
         struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
         _slide_sand_chain(this, x - 1, x, last_connected);
