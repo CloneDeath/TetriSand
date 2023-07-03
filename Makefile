@@ -24,12 +24,19 @@ PROJECTNAME    = TetriSand
 SRCDIR      = src
 OBJDIR      = obj
 RESDIR      = res
+TESTDIR     = test
 BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
+TESTS		= $(OBJDIR)/test.gb
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
 ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
-OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
+TSOURCES    = $(foreach dir,$(TESTDIR),$(notdir $(wildcard $(dir)/*.c)))
+OBJS        = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
+TOBJS       = $(TSOURCES:%.c=$(OBJDIR)/%.o)
 
-all:	prepare $(BINS)
+all: prepare $(BINS) $(TESTS)
+
+prepare:
+	mkdir -p $(OBJDIR)
 
 compile.bat: Makefile
 	@echo "REM Automatically generated from Makefile" > compile.bat
@@ -43,6 +50,10 @@ $(OBJDIR)/%.o:	$(SRCDIR)/%.c
 $(OBJDIR)/%.o:	$(RESDIR)/%.c
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
+# Compile .c files in "test/" to .o object files
+$(OBJDIR)/%.o:	$(TESTDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
 # Compile .s assembly files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.s
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
@@ -53,14 +64,18 @@ $(OBJDIR)/%.s:	$(SRCDIR)/%.c
 	$(LCC) $(LCCFLAGS) -S -o $@ $<
 
 # Link the compiled object files into a .gb ROM file
-$(BINS):	$(OBJS)
+$(BINS): $(OBJS)
 	$(LCC) $(LCCFLAGS) -o $(BINS) $(OBJS)
 
-prepare:
-	mkdir -p $(OBJDIR)
+# Link the compiled test and src object files into a test.gb ROM file
+$(TESTS): $(TOBJS) $(OBJS)
+	$(LCC) $(LCCFLAGS) -o $(TESTS) $(TOBJS) $(filter-out $(OBJDIR)/main.o, $(OBJS))
 
 clean:
 	rm -f  $(OBJDIR)/*.*
 
 run: all
 	$(EMULATOR) $(OBJDIR)/$(PROJECTNAME).gb
+
+test: all
+	$(EMULATOR) $(OBJDIR)/test.gb
