@@ -16,9 +16,9 @@ int main(void)
 
     //add_square(tz, 0, 16, 8, 3);
     //add_square(tz, 0, 32, 4, 2);
-    add_square(tz, 0, 28, 1, 1);
+    //add_square(tz, 0, 28, 1, 1);
 
-    add_square(tz, 0, 5, 10, 3);
+    add_square(tz, 0, 0, 10, 3);
 
     while(true) {
         update_sand(tz);

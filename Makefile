@@ -6,8 +6,8 @@
 # If you move this project you can change the directory
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /home/nicholas/Applications/gbdk/
-EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
-#EMULATOR = mgba-qt
+#EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
+EMULATOR = mgba-qt
 
 LCC = $(GBDK_HOME)bin/lcc
 
@@ -15,8 +15,8 @@ LCC = $(GBDK_HOME)bin/lcc
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
-#LCCFLAGS = -Wm-yc
-LCCFLAGS = -Wm-yc -Wf--debug -Wl-y -Wl-w -Wl-m
+LCCFLAGS = -Wm-yc
+#LCCFLAGS = -Wm-yc -Wf--debug -Wl-y -Wl-w -Wl-m
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
