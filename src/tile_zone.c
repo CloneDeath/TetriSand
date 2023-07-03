@@ -75,7 +75,7 @@ static uint8_t tile_data[16];
 static uint8_t current_tile_index = 255; // Invalid tile index
 static bool needs_update = false;
 
-static inline void load_tile_into_cache(uint8_t tile_index) {
+static inline void _load_tile_colors_into_cache(uint8_t tile_index) {
     if (tile_index == current_tile_index) return;
 
     // Save the modified data of the current tile before loading new tile
@@ -89,7 +89,7 @@ static inline void load_tile_into_cache(uint8_t tile_index) {
     needs_update = false;
 }
 
-static inline void save_and_clear_cache() {
+static inline void _save_and_clear_tile_colors_cache() {
     if (needs_update && current_tile_index != 255) {
         set_bkg_data(current_tile_index, 1, tile_data);
     }
@@ -97,8 +97,8 @@ static inline void save_and_clear_cache() {
     needs_update = false;
 }
 
-static inline uint8_t get_bit(uint8_t tile_index, uint8_t x, uint8_t y) {
-    load_tile_into_cache(tile_index);
+static inline uint8_t _get_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y) {
+    _load_tile_colors_into_cache(tile_index);
 
     uint8_t rowL = tile_data[y * 2 + 0];
     uint8_t rowH = tile_data[y * 2 + 1];
@@ -113,8 +113,8 @@ static inline uint8_t get_bit(uint8_t tile_index, uint8_t x, uint8_t y) {
     return value;
 }
 
-static inline void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
-    load_tile_into_cache(tile_index);
+static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
+    _load_tile_colors_into_cache(tile_index);
 
     uint8_t rowL = tile_data[y * 2 + 0];
     uint8_t rowH = tile_data[y * 2 + 1];
@@ -137,7 +137,7 @@ static inline void set_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t val
     needs_update = true;
 }
 
-static inline uint8_t get_sand(struct tile_zone* this, uint8_t x, uint8_t y) {
+static inline uint8_t _get_sand_color(struct tile_zone* this, uint8_t x, uint8_t y) {
     uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
 
     uint8_t tile_width = this->width - 2;
@@ -147,10 +147,10 @@ static inline uint8_t get_sand(struct tile_zone* this, uint8_t x, uint8_t y) {
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y_flipped % 8;
-    return get_bit(tile_index, pixel_x, pixel_y);
+    return _get_tile_color_bit(tile_index, pixel_x, pixel_y);
 }
 
-static inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+static inline void _set_sand_color(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
 
     uint8_t tile_width = this->width - 2;
@@ -160,45 +160,46 @@ static inline void set_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y_flipped % 8;
-    set_bit(tile_index, pixel_x, pixel_y, value);
+    _set_tile_color_bit(tile_index, pixel_x, pixel_y, value);
 }
 
 static inline void _move_chain_down(struct tile_zone* this, uint8_t x, struct sand_chain* chain) {
     chain->y -= 1;
-    set_sand(this, x, chain->y, chain->value);
-    set_sand(this, x, chain->y + chain->length, DMG_WHITE);
+    _set_sand_color(this, x, chain->y, chain->value);
+    _set_sand_color(this, x, chain->y + chain->length, DMG_WHITE);
 }
 
-static void _set_sand_chain(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
+static void _set_sand_color_column(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
     for (uint8_t i = 0; i < height; i++) {
-        set_sand(this, x, y + i, value);
+        _set_sand_color(this, x, y + i, value);
     }
 }
 
 static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x, struct sand_chain* dest) {
     struct sand_chain* current = &this->sand_chains[x];
     if (current->length == 0) return;
+    if (current->y > 0) return; // sand-chain is still falling
 
     uint8_t target_y = dest->y + dest->length;
-    uint8_t stable_floor = 0;
+    uint8_t target_gap = sand_chain__get_gap_above(dest);
 
-    while (current != NULL) {
-        if (current->y > stable_floor) return;
-        if (current->length - 1 > target_y) {
-            uint8_t amount_to_stay = (target_y - current->y) + 1;
-            struct sand_chain *split = sand_chain__split(current, amount_to_stay);
-            struct sand_chain *split_end = sand_chain__get_last_connected(split);
-            uint8_t length = split_end->y + split_end->length - split->y;
-            _set_sand_chain(this, x, split->y, length, 0);
-            _set_sand_chain(this, new_x, target_y, length, split->value);
-            current->next = split_end->next;
-            split_end->next = dest->next;
-            dest->next = split;
-            split->y = target_y;
-            return;
+    uint8_t connected_length = sand_chain__get_connected_length(current);
+
+    if (current->y + connected_length - 1 > target_y) {
+        uint8_t amount_to_move = ((current->y + connected_length) - target_y) - 1;
+        if (amount_to_move > target_gap) amount_to_move = target_gap;
+
+        struct sand_chain* to_move = sand_chain__excise_chain(current, target_y + 1, amount_to_move);
+        _set_sand_color_column(this, x, to_move->y, amount_to_move, 0);
+        for (struct sand_chain* c = to_move; c != NULL; c = c->next) {
+            c->y -= 1;
+            _set_sand_color_column(this, new_x, c->y, c->length, c->value);
         }
-        stable_floor += current->length;
-        current = current->next;
+
+        struct sand_chain* dest_next = dest->next;
+        dest->next = to_move;
+        struct sand_chain* to_move_top = sand_chain__get_last_connected(to_move);
+        to_move_top->next = dest_next;
     }
 }
 
@@ -263,7 +264,7 @@ void update_sand(struct tile_zone* this) {
         _slide_sand_chain(this, x - 1, x, last_connected);
     }
 
-    save_and_clear_cache();
+    _save_and_clear_tile_colors_cache();
 }
 
 void add_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
@@ -271,7 +272,7 @@ void add_sand(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t length, uint
     struct sand_chain* new_chain = sand_chain__add_chain(chain, y, length, value);
 
     for (uint8_t y_at = new_chain->y; y_at < new_chain->y + new_chain->length; y_at++){
-        set_sand(this, x, y_at, value);
+        _set_sand_color(this, x, y_at, value);
     }
-    save_and_clear_cache();
+    _save_and_clear_tile_colors_cache();
 }
