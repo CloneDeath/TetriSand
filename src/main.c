@@ -13,18 +13,16 @@ int main(void)
     SHOW_BKG;
 
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
-    //add_square(tz, 0, 16, 8, 3);
-    //add_square(tz, 0, 32, 4, 2);
-    //add_square(tz, 0, 28, 1, 1);
-    //add_square(tz, 1, 28, 1, 1);
+    add_square(tz, 0, 32, 4, 2);
+    add_square(tz, 0, 42, 4, 2);
 
     //add_square(tz, 39, 10, 5, 1);
 
     //add_square(tz, 40, 3, 3, 3);
 
-    add_sand(tz, 40, 3, 30, 2);
-
-    add_sand(tz, 25, 60, 30, 2);
+    // single thread case
+    // add_sand(tz, 40, 3, 30, 2);
+    // add_sand(tz, 25, 60, 30, 2);
 
     uint8_t previous = joypad();
     uint8_t current = joypad();
