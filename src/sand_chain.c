@@ -74,7 +74,7 @@ struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
 }
 
 uint8_t sand_chain__get_gap_above(struct sand_chain* this) {
-    if (this->next == NULL) return 255;
+    if (this->next == NULL) return 127;
     return this->next->y - (this->y + this->length);
 }
 
@@ -100,7 +100,7 @@ struct sand_chain* sand_chain__excise_chain(struct sand_chain* this, uint8_t fro
         first_chain = first_chain->next;
     }
 
-    uint8_t split_after = (first_chain->y + first_chain->length) - from;
+    uint8_t split_after = from - first_chain->y;
     struct sand_chain* split_chain = _split(first_chain, split_after);
     struct sand_chain* current = split_chain;
 

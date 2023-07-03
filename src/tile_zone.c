@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gb/gb.h>
 #include "tile_set.h"
+#include <stdio.h>
 
 void initialize_border_tiles(struct tile_zone* this) {
     this->border_tiles = alloc_tile_set(9);
@@ -185,11 +186,19 @@ static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t 
 
     uint8_t connected_length = sand_chain__get_connected_length(current);
 
+
     if (current->y + connected_length - 1 > target_y) {
+        //printf("t:%u g:%u y:%u l:%u\n", target_y, target_gap, current->y, connected_length);
         uint8_t amount_to_move = ((current->y + connected_length) - target_y) - 1;
         if (amount_to_move > target_gap) amount_to_move = target_gap;
+        //printf("to_move: %u\n", amount_to_move);
 
         struct sand_chain* to_move = sand_chain__excise_chain(current, target_y + 1, amount_to_move);
+
+        //printf("c:%u l:%u\n", current->y, current->length);
+        //printf("n:0x%x %u l:%u\n", current->next, current->next->y, current->length);
+        //printf("m:0x%x %u l:%u\n", to_move, to_move->y, to_move->length);
+
         _set_sand_color_column(this, x, to_move->y, amount_to_move, 0);
         for (struct sand_chain* c = to_move; c != NULL; c = c->next) {
             c->y -= 1;

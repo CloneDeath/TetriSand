@@ -6,8 +6,8 @@
 # If you move this project you can change the directory
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
 GBDK_HOME = /home/nicholas/Applications/gbdk/
-#EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
 EMULATOR = mgba-qt
+#EMULATOR = /home/nicholas/Applications/Emulicious/Emulicious.jar
 
 LCC = $(GBDK_HOME)bin/lcc
 
