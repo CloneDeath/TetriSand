@@ -30,19 +30,12 @@ void free_sand_chain(struct sand_chain* this) {
 }
 
 struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
-    if (this->length == 0) {
-        this->length = length;
-        this->value = value;
-        this->y = y;
-        return this;
-    }
     struct sand_chain* current = this;
     while (true) {
         // if y is less than the current link
         if (y < current->y) {
             // make a copy of current
-            struct sand_chain* new = new_sand_chain(current->y, current->length, current->value);
-            new->next = current->next;
+            struct sand_chain* new = copy_sand_chain(current);
 
             // and push it to the next chain
             current->next = new;
@@ -63,7 +56,6 @@ struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uin
             current->next = new_sand_chain(y, length, value);
             return current->next;
         }
-
         current = current->next;
     }
     return NULL;

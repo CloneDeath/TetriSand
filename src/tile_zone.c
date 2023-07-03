@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <gb/gb.h>
 #include "tile_set.h"
-#include <stdio.h>
 
 void initialize_border_tiles(struct tile_zone* this) {
     this->border_tiles = alloc_tile_set(9);
@@ -191,8 +190,8 @@ static inline struct sand_chain* _get_or_create_destination_chain(struct tile_zo
 }
 
 static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t new_x) {
-    struct sand_chain* current = &this->sand_chains[x];
-    if (current->length == 0) return;
+    struct sand_chain* current = this->sand_chains[x].next;
+    if (current == NULL) return;
     if (current->y > 0) return; // sand-chain is still falling
 
     struct sand_chain* dest = _get_or_create_destination_chain(this, new_x);
@@ -226,6 +225,7 @@ static void _collapse_empty_and_similar_chains(struct tile_zone* this) {
     uint8_t width = (this->width - 2) * 8;
     for (uint8_t x = 0; x < width; x++) {
         struct sand_chain *current = &this->sand_chains[x];
+        current = current->next;
 
         while (current != NULL && current->next != NULL) {
             struct sand_chain *next = current->next;

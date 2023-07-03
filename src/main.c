@@ -18,9 +18,13 @@ int main(void)
     //add_square(tz, 0, 28, 1, 1);
     //add_square(tz, 1, 28, 1, 1);
 
-    add_square(tz, 39, 10, 5, 1);
+    //add_square(tz, 39, 10, 5, 1);
 
-    add_square(tz, 40, 3, 3, 3);
+    //add_square(tz, 40, 3, 3, 3);
+
+    add_sand(tz, 40, 3, 30, 2);
+
+    add_sand(tz, 25, 60, 30, 2);
 
     uint8_t previous = joypad();
     uint8_t current = joypad();
@@ -31,6 +35,9 @@ int main(void)
 
         if (current & J_A && !(previous & J_A)) {
             add_square(tz, 30, 100, 20, 3);
+        }
+        if (current & J_B && !(previous & J_B)) {
+            add_square(tz, 30, 100, 20, 2);
         }
 
         update_sand(tz);
