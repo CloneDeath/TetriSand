@@ -13,17 +13,28 @@ int main(void)
     SHOW_BKG;
 
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
-    add_square(tz, 0, 16, 8, 3);
-    add_square(tz, 0, 32, 4, 2);
-    add_square(tz, 0, 28, 1, 1);
-    add_square(tz, 1, 28, 1, 1);
+    //add_square(tz, 0, 16, 8, 3);
+    //add_square(tz, 0, 32, 4, 2);
+    //add_square(tz, 0, 28, 1, 1);
+    //add_square(tz, 1, 28, 1, 1);
 
-    add_square(tz, 16, 40, 20, 1);
+    add_square(tz, 39, 10, 5, 1);
 
-    // add_square(tz, 0, 3, 20, 3);
+    add_square(tz, 40, 3, 3, 3);
+
+    uint8_t previous = joypad();
+    uint8_t current = joypad();
 
     while(true) {
+        previous = current;
+        current = joypad();
+
+        if (current & J_A && !(previous & J_A)) {
+            add_square(tz, 30, 100, 20, 3);
+        }
+
         update_sand(tz);
+
 
         // Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
