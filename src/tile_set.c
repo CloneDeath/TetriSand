@@ -2,7 +2,7 @@
 #include "stdlib.h"
 #include "stdbool.h"
 
-#define MAX_TILES 256
+#define MAX_TILES 255
 bool tile_in_use[MAX_TILES];
 
 bool is_range_available(uint8_t start, uint8_t count) {
