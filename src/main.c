@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 #include "tile_zone.h"
 #include <stdbool.h>
+#include "../res/tetromino.h"
 
 static inline void add_square(struct tile_zone* tz, uint8_t x, uint8_t y, uint8_t size, uint8_t value){
     for (uint8_t i = 0; i < size; i++){
@@ -11,20 +12,18 @@ static inline void add_square(struct tile_zone* tz, uint8_t x, uint8_t y, uint8_
 int main(void)
 {
     SHOW_BKG;
+    SHOW_SPRITES;
+    SPRITES_8x8;
 
     struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
     add_square(tz, 0, 32, 4, 2);
     add_square(tz, 0, 42, 4, 2);
 
-    //add_square(tz, 39, 10, 5, 1);
+    set_sprite_data(0, 4, Tetromino);
+    set_sprite_tile(0, 3);
+    move_sprite(0, 75, 75);
 
-    //add_square(tz, 40, 3, 3, 3);
-
-    // single thread case
-    // add_sand(tz, 40, 3, 30, 2);
-    // add_sand(tz, 25, 60, 30, 2);
-
-    uint8_t previous = joypad();
+    uint8_t previous;
     uint8_t current = joypad();
 
     while(true) {
