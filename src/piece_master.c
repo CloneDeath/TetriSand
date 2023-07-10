@@ -40,10 +40,28 @@ static inline void _move_sprite_to(struct piece_master* this, uint8_t sn, uint8_
 }
 
 static inline void _adjust_sprites(struct piece_master* this) {
-    _move_sprite_to(this, 0, this->x - 4, this->y - 4);
-    _move_sprite_to(this, 1, this->x + 4, this->y - 4);
-    _move_sprite_to(this, 2, this->x - 4, this->y + 4);
-    _move_sprite_to(this, 3, this->x + 4, this->y + 4);
+    switch (this->current_piece) {
+        case O:
+        default:
+            _move_sprite_to(this, 0, this->x - 8, this->y - 8);
+            _move_sprite_to(this, 1, this->x + 0, this->y - 8);
+            _move_sprite_to(this, 2, this->x - 8, this->y + 0);
+            _move_sprite_to(this, 3, this->x + 0, this->y + 0);
+            return;
+        case I:
+            if (this->rotated % 2 == 0) {
+                _move_sprite_to(this, 0, this->x - 16, this->y);
+                _move_sprite_to(this, 1, this->x - 8, this->y);
+                _move_sprite_to(this, 2, this->x + 0, this->y);
+                _move_sprite_to(this, 3, this->x + 8, this->y);
+            } else {
+                _move_sprite_to(this, 0, this->x, this->y - 16);
+                _move_sprite_to(this, 1, this->x, this->y - 8);
+                _move_sprite_to(this, 2, this->x, this->y + 0);
+                _move_sprite_to(this, 3, this->x, this->y + 8);
+            }
+            return;
+    }
 }
 
 static inline void _add_square(struct piece_master* this, uint8_t x, uint8_t y){
@@ -74,6 +92,12 @@ void piece_master__update(struct piece_master* this) {
     if (this->x < 8) this->x = 8;
     uint8_t max_width = (this->zone->width-2) * 8 - 8;
     if (this->x > max_width) this->x = max_width;
+    if (this->current_input & J_A && !(this->previous_input & J_A)) {
+        this->rotated = (this->rotated - 1) % 4;
+    }
+    if (this->current_input & J_B && !(this->previous_input & J_B)) {
+        this->rotated = (this->rotated + 1) % 4;
+    }
 
     this->y -= 1;
     _adjust_sprites(this);
