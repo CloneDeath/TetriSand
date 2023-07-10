@@ -8,7 +8,6 @@ struct tile_zone {
     uint8_t y;
     uint8_t width;
     uint8_t height;
-    struct tile_set* border_tiles;
     struct tile_set* inner_tiles;
     struct sand_chain* sand_chains;
 };

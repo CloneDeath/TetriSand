@@ -3,6 +3,7 @@
 #include "piece_master.h"
 #include <stdbool.h>
 #include <rand.h>
+#include "tile_border.h"
 
 int main(void) {
     SHOW_BKG;
@@ -11,7 +12,8 @@ int main(void) {
 
     initrand(DIV_REG);
 
-    struct tile_zone* tz = new_tile_zone(0, 0, 12, 18);
+    struct tile_border* tb = new_tile_border(0, 0, 12, 18);
+    struct tile_zone* tz = new_tile_zone(1, 1, 10, 16);
     struct piece_master* pm = new_piece_master(tz);
 
     while(true) {

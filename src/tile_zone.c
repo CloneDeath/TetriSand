@@ -1,34 +1,11 @@
 #include "tile_zone.h"
-#include "../res/tile_border.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <gb/gb.h>
 #include "tile_set.h"
 
-void initialize_border_tiles(struct tile_zone* this) {
-    this->border_tiles = alloc_tile_set(9);
-
-    set_bkg_data(this->border_tiles->start, this->border_tiles->count, TileBorder);
-
-    set_bkg_tile_xy(this->x, this->y, this->border_tiles->start + 0); // Top-Left
-    set_bkg_tile_xy(this->x + this->width - 1, this->y, this->border_tiles->start + 2); // Top-Right
-    set_bkg_tile_xy(this->x, this->y + this->height - 1, this->border_tiles->start + 5); // Bottom-Left
-    set_bkg_tile_xy(this->x + this->width - 1, this->y + this->height - 1, this->border_tiles->start + 7); // Bottom-Right
-
-    for (uint8_t i = 1; i < this->width-1; i++){
-        set_bkg_tile_xy(this->x + i, this->y, this->border_tiles->start + 1); // Top
-        set_bkg_tile_xy(this->x + i, this->y + this->height - 1, this->border_tiles->start + 6); // Bottom
-    }
-    for (uint8_t i = 1; i < this->height-1; i++){
-        set_bkg_tile_xy(this->x, this->y + i, this->border_tiles->start + 3); // Left
-        set_bkg_tile_xy(this->x + this->width - 1, this->y + i, this->border_tiles->start + 4); // Right
-    }
-}
-
 void initialize_inner_tiles(struct tile_zone* this) {
-    uint8_t inner_width = this->width - 2;
-    uint8_t inner_height = this->height - 2;
-    uint8_t nb_tiles = inner_width * inner_height;
+    uint8_t nb_tiles = this->width * this->height;
     this->inner_tiles = alloc_tile_set(nb_tiles);
 
     for (uint16_t z = 0; z < nb_tiles; z++) {
@@ -42,10 +19,10 @@ void initialize_inner_tiles(struct tile_zone* this) {
     }
 
 
-    for (uint8_t x = 0; x < inner_width; x++) {
-        for (uint8_t y = 0; y < inner_height; y++) {
-            uint8_t tile_offset = y * inner_width + x;
-            set_bkg_tile_xy(this->x + x + 1, this->y + y + 1, this->inner_tiles->start + tile_offset);
+    for (uint8_t x = 0; x < this->width; x++) {
+        for (uint8_t y = 0; y < this->height; y++) {
+            uint8_t tile_offset = y * this->width + x;
+            set_bkg_tile_xy(this->x + x, this->y + y, this->inner_tiles->start + tile_offset);
         }
     }
 }
@@ -57,17 +34,15 @@ struct tile_zone* new_tile_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
     tz->width = width;
     tz->height = height;
 
-    initialize_border_tiles(tz);
     initialize_inner_tiles(tz);
 
-    tz->sand_chains = calloc((tz->width - 2) * 8, sizeof(struct sand_chain));
+    tz->sand_chains = calloc(tz->width * 8, sizeof(struct sand_chain));
 
     return tz;
 }
 
 void delete_tile_zone(struct tile_zone* this) {
     free_tile_set(this->inner_tiles);
-    free_tile_set(this->border_tiles);
     free(this);
 }
 
@@ -138,12 +113,11 @@ static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y,
 }
 
 static inline uint8_t _get_sand_color(struct tile_zone* this, uint8_t x, uint8_t y) {
-    uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
+    uint8_t y_flipped = (this->height * 8 - 1) - y;
 
-    uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
     uint8_t tile_y = y_flipped / 8;
-    uint8_t tile_offset = tile_width * tile_y + tile_x;
+    uint8_t tile_offset = this->width * tile_y + tile_x;
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y_flipped % 8;
@@ -151,12 +125,11 @@ static inline uint8_t _get_sand_color(struct tile_zone* this, uint8_t x, uint8_t
 }
 
 static inline void _set_sand_color(struct tile_zone* this, uint8_t x, uint8_t y, uint8_t value) {
-    uint8_t y_flipped = ((this->height - 2)*8 - 1) - y;
+    uint8_t y_flipped = (this->height * 8 - 1) - y;
 
-    uint8_t tile_width = this->width - 2;
     uint8_t tile_x = x / 8;
     uint8_t tile_y = y_flipped / 8;
-    uint8_t tile_offset = tile_width * tile_y + tile_x;
+    uint8_t tile_offset = this->width * tile_y + tile_x;
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y_flipped % 8;
@@ -222,7 +195,7 @@ static inline void _slide_sand_chain(struct tile_zone* this, uint8_t x, uint8_t 
 }
 
 static void _collapse_empty_and_similar_chains(struct tile_zone* this) {
-    uint8_t width = (this->width - 2) * 8;
+    uint8_t width = this->width * 8;
     for (uint8_t x = 0; x < width; x++) {
         struct sand_chain *current = &this->sand_chains[x];
         current = current->next;
@@ -252,7 +225,7 @@ static void _collapse_empty_and_similar_chains(struct tile_zone* this) {
 void update_sand(struct tile_zone* this) {
     _collapse_empty_and_similar_chains(this);
 
-    uint8_t width = (this->width - 2) * 8;
+    uint8_t width = this->width * 8;
 
     for (uint8_t x = 0; x < width; x++) {
         struct sand_chain *chain = &this->sand_chains[x];

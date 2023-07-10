@@ -19,11 +19,11 @@ struct piece_master* new_piece_master(struct tile_zone* zone) {
 }
 
 static inline uint8_t _get_center_x(struct piece_master* this) {
-    return ((this->zone->width - 2) * 8) / 2;
+    return (this->zone->width * 8) / 2;
 }
 
 static inline uint8_t _get_top_y(struct piece_master* this) {
-    return ((this->zone->height - 2) * 8);
+    return this->zone->height * 8;
 }
 
 static inline void _set_color(struct piece_master* this, uint8_t color) {
@@ -35,7 +35,7 @@ static inline void _set_color(struct piece_master* this, uint8_t color) {
 
 static inline void _move_sprite_to(struct piece_master* this, uint8_t sn, uint8_t x, uint8_t y) {
     uint8_t screen_x = ((this->zone->x + 2) * 8) + x - 4;
-    uint8_t screen_y = ((this->zone->y + 2 + this->zone->height - 2) * 8) - y + 4;
+    uint8_t screen_y = ((this->zone->y + 2 + this->zone->height) * 8) - y + 4;
     move_sprite(sn, screen_x, screen_y);
 }
 
@@ -90,7 +90,7 @@ void piece_master__update(struct piece_master* this) {
         this->x += 1;
     }
     if (this->x < 8) this->x = 8;
-    uint8_t max_width = (this->zone->width-2) * 8 - 8;
+    uint8_t max_width = this->zone->width * 8 - 8;
     if (this->x > max_width) this->x = max_width;
     if (this->current_input & J_A && !(this->previous_input & J_A)) {
         this->rotated = (this->rotated - 1) % 4;
