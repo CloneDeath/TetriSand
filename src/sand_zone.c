@@ -38,6 +38,9 @@ struct sand_zone* new_sand_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 
     tz->sand_chains = calloc(tz->width * 8, sizeof(struct sand_chain));
 
+    tz->needs_update = calloc(tz->width * 8, sizeof(bool));
+    tz->was_updated = calloc(tz->width * 8, sizeof(bool));
+
     return tz;
 }
 
@@ -191,6 +194,8 @@ static inline void _slide_sand_chain(struct sand_zone* this, uint8_t x, uint8_t 
         dest->next = to_move;
         struct sand_chain* to_move_top = sand_chain__get_last_connected(to_move);
         to_move_top->next = dest_next;
+        this->was_updated[x] = true;
+        this->was_updated[new_x] = true;
     }
 }
 
@@ -227,10 +232,17 @@ void sand_zone__update_sand(struct sand_zone* this) {
 
     uint8_t width = this->width * 8;
 
+    bool* swap = this->needs_update;
+    this->needs_update = this->was_updated;
+    this->was_updated = swap;
+
     for (uint8_t x = 0; x < width; x++) {
+        this->was_updated[x] = false;
+
         struct sand_chain *chain = &this->sand_chains[x];
         if (chain->y > 0) {
             _move_chain_down(this, x, chain);
+            this->was_updated[x] = true;
         }
 
         struct sand_chain *prev_chain = chain;
@@ -238,6 +250,7 @@ void sand_zone__update_sand(struct sand_zone* this) {
         while (chain) {
             if (chain->y > prev_chain->y + prev_chain->length) {
                 _move_chain_down(this, x, chain);
+                this->was_updated[x] = true;
             }
             prev_chain = chain;
             chain = chain->next;
@@ -245,10 +258,12 @@ void sand_zone__update_sand(struct sand_zone* this) {
     }
 
     for (uint8_t x = 0; x < width - 1; x++) {
+        if (!this->needs_update[x] && !this->needs_update[x + 1]) continue;
         _slide_sand_chain(this, x + 1, x);
     }
 
     for (uint8_t x = width - 1; x > 0; x--) {
+        if (!this->needs_update[x] && !this->needs_update[x - 1]) continue;
         _slide_sand_chain(this, x - 1, x);
     }
 
@@ -263,4 +278,5 @@ void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t l
         _set_sand_color(this, x, y_at, value);
     }
     _save_and_clear_tile_colors_cache();
+    this->was_updated[x] = true;
 }
