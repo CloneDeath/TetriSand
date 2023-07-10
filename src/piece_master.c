@@ -6,7 +6,7 @@
 
 const uint8_t NUMBER_OF_PIECES = 7;
 
-struct piece_master* new_piece_master(struct tile_zone* zone) {
+struct piece_master* new_piece_master(struct sand_zone* zone) {
     set_sprite_data(0, 4, Tetromino);
 
     struct piece_master* this = malloc(sizeof (struct piece_master));
@@ -66,7 +66,7 @@ static inline void _adjust_sprites(struct piece_master* this) {
 
 static inline void _add_square(struct piece_master* this, uint8_t x, uint8_t y){
     for (uint8_t i = 0; i < 8; i++){
-        add_sand(this->zone, x + i - 4, y - 4, 8, this->color);
+        sand_zone__add_sand(this->zone, x + i - 4, y - 4, 8, this->color);
     }
 }
 

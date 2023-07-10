@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tile_zone.h"
+#include "sand_zone.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -14,11 +14,11 @@ struct piece_master {
     uint8_t y;
     uint8_t rotated;
     uint8_t color;
-    struct tile_zone* zone;
+    struct sand_zone* zone;
     bool needs_new_piece;
     uint8_t previous_input;
     uint8_t current_input;
 };
 
-struct piece_master* new_piece_master(struct tile_zone* zone);
+struct piece_master* new_piece_master(struct sand_zone* zone);
 void piece_master__update(struct piece_master* this);
