@@ -34,33 +34,71 @@ static inline void _set_color(struct piece_master* this, uint8_t color) {
 }
 
 static inline void _move_sprite_to(struct piece_master* this, uint8_t sn, uint8_t x, uint8_t y) {
-    uint8_t screen_x = ((this->zone->x + 2) * 8) + x - 4;
-    uint8_t screen_y = ((this->zone->y + 2 + this->zone->height) * 8) - y + 4;
+    uint8_t screen_x = ((this->zone->x + 1) * 8) + x;
+    uint8_t screen_y = ((this->zone->y + 1 + this->zone->height) * 8) - y;
     move_sprite(sn, screen_x, screen_y);
 }
 
-static inline void _adjust_sprites(struct piece_master* this) {
+static inline int8_t _get_min_x(struct piece_master* this) {
     switch (this->current_piece) {
         case O:
         default:
-            _move_sprite_to(this, 0, this->x - 8, this->y - 8);
-            _move_sprite_to(this, 1, this->x + 0, this->y - 8);
-            _move_sprite_to(this, 2, this->x - 8, this->y + 0);
-            _move_sprite_to(this, 3, this->x + 0, this->y + 0);
-            return;
+            return -8;
         case I:
             if (this->rotated % 2 == 0) {
-                _move_sprite_to(this, 0, this->x - 16, this->y);
-                _move_sprite_to(this, 1, this->x - 8, this->y);
-                _move_sprite_to(this, 2, this->x + 0, this->y);
-                _move_sprite_to(this, 3, this->x + 8, this->y);
+                return -16;
             } else {
-                _move_sprite_to(this, 0, this->x, this->y - 16);
-                _move_sprite_to(this, 1, this->x, this->y - 8);
-                _move_sprite_to(this, 2, this->x, this->y + 0);
-                _move_sprite_to(this, 3, this->x, this->y + 8);
+                return 0;
             }
-            return;
+    }
+}
+
+static inline uint8_t _get_max_x(struct piece_master* this) {
+    switch (this->current_piece) {
+        case O:
+        default:
+            return 8;
+        case I:
+            if (this->rotated % 2 == 0) {
+                return 16;
+            } else {
+                return 8;
+            }
+    }
+}
+
+struct offset {
+    int8_t x;
+    int8_t y;
+};
+
+const struct offset offsets[7][4] = {
+    { {  0,  0 }, {  0,  1 }, {  1,  0 }, {  1,  1 } }, // O
+    { { -2,  0 }, { -1,  0 }, {  0,  0 }, {  1,  0 } }, // I
+    { { -1,  0 }, {  0,  0 }, {  1,  0 }, {  0,  1 } }, // T
+    { { -1, -1 }, {  0,  0 }, {  0, -1 }, {  1,  0 } }, // S
+    { { -1,  0 }, {  0,  0 }, {  0, -1 }, {  1, -1 } }, // Z
+    { {  0,  1 }, {  0,  0 }, {  0, -1 }, {  1, -1 } }, // L
+    { {  0,  1 }, {  0,  0 }, {  0, -1 }, { -1, -1 } }, // J
+};
+
+static inline void _adjust_sprites(struct piece_master* this) {
+    for (uint8_t i = 0; i < 4; i++){
+        const struct offset* current = &(offsets[this->current_piece][i]);
+        switch (this->rotated % 4) {
+            case 0:
+                _move_sprite_to(this, i, this->x + current->x * 8, this->y + current->y * 8);
+                break;
+            case 1:
+                _move_sprite_to(this, i, this->x - current->y * 8, this->y + current->x * 8);
+                break;
+            case 2:
+                _move_sprite_to(this, i, this->x - current->x * 8, this->y - current->y * 8);
+                break;
+            case 3:
+                _move_sprite_to(this, i, this->x + current->y * 8, this->y - current->x * 8);
+                break;
+        }
     }
 }
 
@@ -89,9 +127,9 @@ void piece_master__update(struct piece_master* this) {
     if (this->current_input & J_RIGHT) {
         this->x += 1;
     }
-    if (this->x < 8) this->x = 8;
-    uint8_t max_width = this->zone->width * 8 - 8;
-    if (this->x > max_width) this->x = max_width;
+    if (this->x + _get_min_x(this) < 0) this->x = -_get_min_x(this);
+    uint8_t max_width = this->zone->width * 8;
+    if (this->x + _get_max_x(this) > max_width) this->x = max_width - _get_max_x(this);
     if (this->current_input & J_A && !(this->previous_input & J_A)) {
         this->rotated = (this->rotated - 1) % 4;
     }

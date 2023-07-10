@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 enum piece_type {
-    O, I, T, S, Z, L, J
+    O = 0, I, T, S, Z, L, J
 };
 
 struct piece_master {
