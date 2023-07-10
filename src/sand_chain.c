@@ -58,7 +58,6 @@ struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uin
         }
         current = current->next;
     }
-    return NULL;
 }
 
 struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
