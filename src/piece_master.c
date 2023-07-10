@@ -72,7 +72,7 @@ void piece_master__update(struct piece_master* this) {
         this->x += 1;
     }
     if (this->x < 8) this->x = 8;
-    uint8_t max_width = (this->zone->width-2) * 8 - 1 - 8;
+    uint8_t max_width = (this->zone->width-2) * 8 - 8;
     if (this->x > max_width) this->x = max_width;
 
     this->y -= 1;
