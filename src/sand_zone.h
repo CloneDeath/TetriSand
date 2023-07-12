@@ -21,3 +21,5 @@ void delete_sand_zone(struct sand_zone* this);
 
 void sand_zone__update_sand(struct sand_zone* this);
 void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value);
+
+bool sand_zone__has_sand_at(struct sand_zone* this, uint8_t x, uint8_t y);

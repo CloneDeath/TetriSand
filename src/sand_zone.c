@@ -280,3 +280,7 @@ void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t l
     _save_and_clear_tile_colors_cache();
     this->was_updated[x] = true;
 }
+
+bool sand_zone__has_sand_at(struct sand_zone* this, uint8_t x, uint8_t y) {
+    return _get_sand_color(this, x, y) > 0;
+}

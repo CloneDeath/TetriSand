@@ -130,6 +130,26 @@ static inline void _spawn_sand(struct piece_master* this) {
     }
 }
 
+static inline bool _sub_piece_is_touching_sand(struct piece_master* this, uint8_t sb) {
+    uint8_t piece_x = this->x + _get_sub_piece_x(this, sb);
+    uint8_t piece_y = this->y + _get_sub_piece_y(this, sb);
+    for (uint8_t x = piece_x; x < piece_x + 8; x++) {
+        if (sand_zone__has_sand_at(this->zone, x, piece_y - 1)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static inline bool _piece_is_touching_sand(struct piece_master* this) {
+    for (uint8_t i = 0; i < 4; i++) {
+        if (_sub_piece_is_touching_sand(this, i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void piece_master__update(struct piece_master* this) {
     if (this->needs_new_piece) {
         this->needs_new_piece = false;
@@ -161,7 +181,7 @@ void piece_master__update(struct piece_master* this) {
     this->y -= 1;
     _adjust_sprites(this);
 
-    if (this->y <= _get_min_y(this)) {
+    if (this->y <= _get_min_y(this) || _piece_is_touching_sand(this)) {
         _spawn_sand(this);
         this->needs_new_piece = true;
     }
