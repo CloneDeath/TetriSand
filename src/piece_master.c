@@ -60,6 +60,7 @@ static inline int8_t _get_sub_piece_x(struct piece_master* this, uint8_t sn) {
         case 0: return current->x * 8;
         case 1: return -current->y * 8;
         case 2: return -current->x * 8;
+        default:
         case 3: return current->y * 8;
     }
 }
@@ -70,6 +71,7 @@ static inline uint8_t _get_sub_piece_y(struct piece_master* this, uint8_t sn) {
         case 0: return current->y * 8;
         case 1: return current->x * 8;
         case 2: return -current->y * 8;
+        default:
         case 3: return -current->x * 8;
     }
 }
@@ -83,6 +85,17 @@ static inline uint8_t _get_min_x(struct piece_master* this) {
         }
     }
     return -1 * min_x;
+}
+
+static inline uint8_t _get_min_y(struct piece_master* this) {
+    int8_t min_y = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t y = _get_sub_piece_y(this, i);
+        if (y < min_y) {
+            min_y = y;
+        }
+    }
+    return -1 * min_y;
 }
 
 static inline uint8_t _get_max_x(struct piece_master* this) {
@@ -104,7 +117,16 @@ static inline void _adjust_sprites(struct piece_master* this) {
 
 static inline void _add_square(struct piece_master* this, uint8_t x, uint8_t y){
     for (uint8_t i = 0; i < 8; i++){
-        sand_zone__add_sand(this->zone, x + i - 4, y - 4, 8, this->color);
+        sand_zone__add_sand(this->zone, x + i, y, 8, this->color);
+    }
+}
+
+static inline void _spawn_sand(struct piece_master* this) {
+    for (uint8_t i; i < 4; i++) {
+        int8_t x = _get_sub_piece_x(this, i);
+        int8_t y = _get_sub_piece_y(this, i);
+
+        _add_square(this, this->x + x, this->y + y);
     }
 }
 
@@ -124,7 +146,7 @@ void piece_master__update(struct piece_master* this) {
     if (this->current_input & J_LEFT && this->x > _get_min_x(this)) {
         this->x -= 1;
     }
-    if (this->current_input & J_RIGHT && this->x ,m99oo) {
+    if (this->current_input & J_RIGHT && this->x < _get_max_x(this)) {
         this->x += 1;
     }
     if (this->x < _get_min_x(this)) this->x = _get_min_x(this);
@@ -139,11 +161,8 @@ void piece_master__update(struct piece_master* this) {
     this->y -= 1;
     _adjust_sprites(this);
 
-    if (this->y <= 8) {
-        _add_square(this, this->x - 4, this->y - 4);
-        _add_square(this, this->x + 4, this->y - 4);
-        _add_square(this, this->x - 4, this->y + 4);
-        _add_square(this, this->x + 4, this->y + 4);
+    if (this->y <= _get_min_y(this)) {
+        _spawn_sand(this);
         this->needs_new_piece = true;
     }
 }
