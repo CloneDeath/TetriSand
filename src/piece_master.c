@@ -39,34 +39,6 @@ static inline void _move_sprite_to(struct piece_master* this, uint8_t sn, uint8_
     move_sprite(sn, screen_x, screen_y);
 }
 
-static inline int8_t _get_min_x(struct piece_master* this) {
-    switch (this->current_piece) {
-        case O:
-        default:
-            return -8;
-        case I:
-            if (this->rotated % 2 == 0) {
-                return -16;
-            } else {
-                return 0;
-            }
-    }
-}
-
-static inline uint8_t _get_max_x(struct piece_master* this) {
-    switch (this->current_piece) {
-        case O:
-        default:
-            return 8;
-        case I:
-            if (this->rotated % 2 == 0) {
-                return 16;
-            } else {
-                return 8;
-            }
-    }
-}
-
 struct offset {
     int8_t x;
     int8_t y;
@@ -82,23 +54,51 @@ const struct offset offsets[7][4] = {
     { {  0,  1 }, {  0,  0 }, {  0, -1 }, { -1, -1 } }, // J
 };
 
-static inline void _adjust_sprites(struct piece_master* this) {
-    for (uint8_t i = 0; i < 4; i++){
-        const struct offset* current = &(offsets[this->current_piece][i]);
-        switch (this->rotated % 4) {
-            case 0:
-                _move_sprite_to(this, i, this->x + current->x * 8, this->y + current->y * 8);
-                break;
-            case 1:
-                _move_sprite_to(this, i, this->x - current->y * 8, this->y + current->x * 8);
-                break;
-            case 2:
-                _move_sprite_to(this, i, this->x - current->x * 8, this->y - current->y * 8);
-                break;
-            case 3:
-                _move_sprite_to(this, i, this->x + current->y * 8, this->y - current->x * 8);
-                break;
+static inline int8_t _get_sub_piece_x(struct piece_master* this, uint8_t sn) {
+    const struct offset* current = &(offsets[this->current_piece][sn]);
+    switch (this->rotated % 4) {
+        case 0: return current->x * 8;
+        case 1: return -current->y * 8;
+        case 2: return -current->x * 8;
+        case 3: return current->y * 8;
+    }
+}
+
+static inline uint8_t _get_sub_piece_y(struct piece_master* this, uint8_t sn) {
+    const struct offset* current = &(offsets[this->current_piece][sn]);
+    switch (this->rotated % 4) {
+        case 0: return current->y * 8;
+        case 1: return current->x * 8;
+        case 2: return -current->y * 8;
+        case 3: return -current->x * 8;
+    }
+}
+
+static inline uint8_t _get_min_x(struct piece_master* this) {
+    int8_t min_x = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t x = _get_sub_piece_x(this, i);
+        if (x < min_x) {
+            min_x = x;
         }
+    }
+    return -1 * min_x;
+}
+
+static inline uint8_t _get_max_x(struct piece_master* this) {
+    int8_t max_x = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t x = _get_sub_piece_x(this, i);
+        if (x > max_x) {
+            max_x = x;
+        }
+    }
+    return (this->zone->width * 8) - (max_x + 8);
+}
+
+static inline void _adjust_sprites(struct piece_master* this) {
+    for (uint8_t i = 0; i < 4; i++) {
+        _move_sprite_to(this, i, this->x + _get_sub_piece_x(this, i), this->y + _get_sub_piece_y(this, i));
     }
 }
 
@@ -121,15 +121,14 @@ void piece_master__update(struct piece_master* this) {
     this->previous_input = this->current_input;
     this->current_input = joypad();
 
-    if (this->current_input & J_LEFT) {
+    if (this->current_input & J_LEFT && this->x > _get_min_x(this)) {
         this->x -= 1;
     }
-    if (this->current_input & J_RIGHT) {
+    if (this->current_input & J_RIGHT && this->x ,m99oo) {
         this->x += 1;
     }
-    if (this->x + _get_min_x(this) < 0) this->x = -_get_min_x(this);
-    uint8_t max_width = this->zone->width * 8;
-    if (this->x + _get_max_x(this) > max_width) this->x = max_width - _get_max_x(this);
+    if (this->x < _get_min_x(this)) this->x = _get_min_x(this);
+    if (this->x > _get_max_x(this)) this->x = _get_max_x(this);
     if (this->current_input & J_A && !(this->previous_input & J_A)) {
         this->rotated = (this->rotated - 1) % 4;
     }

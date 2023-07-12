@@ -3,8 +3,7 @@
 #include "test.h"
 #include "../src/sand_chain.h"
 
-void excise_chain_works(void)
-{
+void excise_chain_works(void) {
     struct sand_chain* chain = new_sand_chain(0, 10, 3);
 
     struct sand_chain* split = sand_chain__excise_chain(chain, 3, 5);
@@ -34,8 +33,7 @@ const struct test test_list[] = {
     { NULL, NULL }
 };
 
-int main()
-{
+int main() {
     SHOW_BKG;
     run_tests((struct test*)test_list);
     wait_vbl_done();
