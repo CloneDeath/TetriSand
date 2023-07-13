@@ -21,4 +21,6 @@ struct piece_master {
 };
 
 struct piece_master* new_piece_master(struct sand_zone* zone);
+void delete_piece_master(struct piece_master* this);
+
 void piece_master__update(struct piece_master* this);

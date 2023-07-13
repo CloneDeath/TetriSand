@@ -1,6 +1,7 @@
 #include "tile_set.h"
 #include "stdlib.h"
 #include "stdbool.h"
+#include <gb/gb.h>
 
 #define MAX_TILES 255
 bool tile_in_use[MAX_TILES];
@@ -46,4 +47,8 @@ void free_range(uint8_t start, uint8_t count) {
 void free_tile_set(struct tile_set* this) {
     free_range(this->start, this->count);
     free(this);
+}
+
+void tile_set__set_data(struct tile_set* this, const uint8_t *data) {
+    set_bkg_data(this->start, this->count, data);
 }

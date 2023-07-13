@@ -7,7 +7,7 @@
 inline static void __initialize_border_tiles(struct tile_border* this) {
     this->border_tiles = alloc_tile_set(9);
 
-    set_bkg_data(this->border_tiles->start, this->border_tiles->count, TileBorder);
+    tile_set__set_data(this->border_tiles, TileBorder);
 
     set_bkg_tile_xy(this->x, this->y, this->border_tiles->start + 0); // Top-Left
     set_bkg_tile_xy(this->x + this->width - 1, this->y, this->border_tiles->start + 2); // Top-Right
