@@ -1,13 +1,13 @@
-#include "tile_border.h"
+#include "TileBorder.h"
 #include "tile_set.h"
-#include "../res/border_tiles.h"
+#include "../res/tile-border.h"
 #include <stdlib.h>
 #include <gb/gb.h>
 
-inline static void __initialize_border_tiles(struct tile_border* this) {
+inline static void _initialize_border_tiles(struct TileBorder* this) {
     this->border_tiles = alloc_tile_set(9);
 
-    tile_set__set_data(this->border_tiles, TileBorder);
+    tile_set__set_data(this->border_tiles, TILE_Border);
 
     set_bkg_tile_xy(this->x, this->y, this->border_tiles->start + 0); // Top-Left
     set_bkg_tile_xy(this->x + this->width - 1, this->y, this->border_tiles->start + 2); // Top-Right
@@ -24,17 +24,26 @@ inline static void __initialize_border_tiles(struct tile_border* this) {
     }
 }
 
-struct tile_border* new_tile_border(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    struct tile_border* tb = (struct tile_border*)malloc(sizeof(struct tile_border));
+static struct TileBorder* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    struct TileBorder* tb = malloc(sizeof(struct TileBorder));
+    tb->_initialize_border_tiles = &_initialize_border_tiles;
+
     tb->x = x;
     tb->y = y;
     tb->width = width;
     tb->height = height;
-    __initialize_border_tiles(tb);
+    tb->_initialize_border_tiles(tb);
     return tb;
 }
 
-void delete_tile_border(struct tile_border* this) {
+static void delete(struct TileBorder* this) {
     free_tile_set(this->border_tiles);
     free(this);
 }
+
+const struct TileBorderClass TileBorder = {
+    .new=&new,
+    .delete=&delete
+};
+
+

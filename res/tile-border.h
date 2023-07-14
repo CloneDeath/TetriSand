@@ -26,9 +26,9 @@
 #define __tile_border_h_INCLUDE
 
 /* Bank of tiles. */
-#define TileBorderBank 0
+#define TILE_BorderBank 0
 /* Start of tile array. */
-extern const unsigned char TileBorder[];
+extern const unsigned char TILE_Border[];
 
 #endif
 

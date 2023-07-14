@@ -3,7 +3,7 @@
 #include "piece_master.h"
 #include <stdbool.h>
 #include <rand.h>
-#include "tile_border.h"
+#include "TileBorder.h"
 #include "tile_set.h"
 #include "../res/tile-title.h"
 #include "../res/map-title.h"
@@ -24,7 +24,7 @@ void show_title() {
 }
 
 void run_game() {
-    struct tile_border* tb = new_tile_border(0, 0, 12, 18);
+    struct TileBorder* tb = TileBorder.new(0, 0, 12, 18);
     struct sand_zone* tz = new_sand_zone(1, 1, 10, 16);
     struct piece_master* pm = new_piece_master(tz);
 
@@ -36,7 +36,7 @@ void run_game() {
     }
 
     delete_sand_zone(tz);
-    delete_tile_border(tb);
+    TileBorder.delete(tb);
     delete_piece_master(pm);
 }
 
