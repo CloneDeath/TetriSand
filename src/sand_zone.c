@@ -196,6 +196,10 @@ static inline void _slide_sand_chain(struct sand_zone* this, uint8_t x, uint8_t 
         dest->next = to_move;
         struct sand_chain* to_move_top = sand_chain__get_last_connected(to_move);
         to_move_top->next = dest_next;
+
+        sand_chain__try_to_combine(dest);
+        sand_chain__try_to_combine(to_move_top);
+
         this->was_updated[x] = true;
         this->was_updated[new_x] = true;
     }
@@ -218,12 +222,7 @@ static inline void _collapse_empty_and_similar_chains(struct sand_zone* this) {
                 free_sand_chain(next);
                 continue;
             }
-            if (current->value == next->value && current->y + current->length == next->y) {
-                current->length += next->length;
-                current->next = next->next;
-                next->next = NULL;
-                free_sand_chain(next);
-            }
+            sand_chain__try_to_combine(current);
             current = current->next;
         }
     }

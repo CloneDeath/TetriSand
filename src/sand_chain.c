@@ -127,3 +127,15 @@ struct sand_chain* sand_chain__excise_chain(struct sand_chain* this, uint8_t fro
         return split_chain;
     }
 }
+
+void sand_chain__try_to_combine(struct sand_chain *this) {
+    struct sand_chain* next = this->next;
+    if (next == NULL) return;
+    if (this->value != next->value) return;
+    if (this->y + this->length < next->y) return;
+
+    this->length += next->length;
+    this->next = next->next;
+    next->next = NULL;
+    free_sand_chain(next);
+}
