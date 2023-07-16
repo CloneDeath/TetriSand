@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <gb/gb.h>
 #include "tile_set.h"
+#include "allocate.h"
 
 void initialize_inner_tiles(struct sand_zone* this) {
     uint8_t nb_tiles = this->width * this->height;
@@ -36,7 +37,7 @@ struct sand_zone* new_sand_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 
     initialize_inner_tiles(tz);
 
-    tz->sand_chains = calloc(tz->width * 8, sizeof(struct sand_chain));
+    tz->sand_chains = allocate_array(tz->width * 8, sizeof(struct sand_chain));
 
     tz->needs_update = calloc(tz->width * 8, sizeof(bool));
     tz->was_updated = calloc(tz->width * 8, sizeof(bool));
