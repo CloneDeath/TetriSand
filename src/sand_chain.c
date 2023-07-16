@@ -116,17 +116,8 @@ void sand_chain__try_to_combine(struct sand_chain *this) {
 
 /******* CLASS *******/
 
-uint16_t sand_chains = 0;
-
 static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
-    sand_chains++;
-
-    struct sand_chain* chain = malloc(sizeof(struct sand_chain));
-    if (chain == NULL) {
-        printf("OUT OF MEMORY\n");
-        printf("Sand Chains: %u", sand_chains);
-        exit(-1);
-    }
+    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = y;
     chain->length = length;
     chain->value = value;
@@ -135,26 +126,12 @@ static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
 }
 
 static struct sand_chain* new_array(size_t count) {
-    sand_chains += count;
-
-    struct sand_chain* chain = calloc(count, sizeof(struct sand_chain));
-    if (chain == NULL) {
-        printf("OUT OF MEMORY\n");
-        printf("Sand Chains: %u", sand_chains);
-        exit(-1);
-    }
+    struct sand_chain* chain = allocate_array(count, sizeof(struct sand_chain));
     return chain;
 }
 
 static struct sand_chain* copy(struct sand_chain* original) {
-    sand_chains++;
-
-    struct sand_chain* chain = malloc(sizeof(struct sand_chain));
-    if (chain == NULL) {
-        printf("OUT OF MEMORY\n");
-        printf("Sand Chains: %u", sand_chains);
-        exit(-1);
-    }
+    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = original->y;
     chain->length = original->length;
     chain->value = original->value;
@@ -163,8 +140,6 @@ static struct sand_chain* copy(struct sand_chain* original) {
 }
 
 static void delete(struct sand_chain* this) {
-    sand_chains--;
-
     struct sand_chain* current = this;
     while (current != NULL) {
         struct sand_chain* next = current->next;

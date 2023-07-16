@@ -7,6 +7,7 @@
 #include "tile_set.h"
 #include "../res/tile-title.h"
 #include "../res/map-title.h"
+#include "TextArea.h"
 
 void show_title() {
     struct tile_set* set = alloc_tile_set(47);
@@ -28,6 +29,10 @@ void run_game() {
     struct sand_zone* tz = new_sand_zone(1, 1, 10, 16);
     struct piece_master* pm = new_piece_master(tz);
 
+    struct TileBorder* tb2 = TileBorder.new(12, 0, 8, 18);
+    struct TextArea* ta = TextArea.new(13, 1, 6, 16);
+    ta->print_number(ta, 9);
+
     while(true) {
         sand_zone__update_sand(tz);
         piece_master__update(pm);
@@ -37,6 +42,7 @@ void run_game() {
 
     delete_sand_zone(tz);
     TileBorder.delete(tb);
+    TileBorder.delete(tb2);
     delete_piece_master(pm);
 }
 

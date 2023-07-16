@@ -15,7 +15,6 @@ LCC = $(GBDK_HOME)bin/lcc
 # https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_toolchain_settings.html
 # -Wm-yc            GameBoy Color compatible
 # -Wm-yC            GameBoy Color only
-# -Wm-ys            Super GameBoy
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
