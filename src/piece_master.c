@@ -2,6 +2,7 @@
 #include <gb/gb.h>
 #include <stdlib.h>
 #include <rand.h>
+#include "allocate.h"
 #include "../res/tetromino.h"
 
 const uint8_t NUMBER_OF_PIECES = 7;
@@ -9,7 +10,7 @@ const uint8_t NUMBER_OF_PIECES = 7;
 struct piece_master* new_piece_master(struct sand_zone* zone) {
     set_sprite_data(0, 4, Tetromino);
 
-    struct piece_master* this = malloc(sizeof (struct piece_master));
+    struct piece_master* this = allocate(sizeof (struct piece_master));
     this->x = 0;
     this->y = 0;
     this->current_piece = O;

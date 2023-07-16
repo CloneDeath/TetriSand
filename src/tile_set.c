@@ -1,7 +1,8 @@
 #include "tile_set.h"
-#include "stdlib.h"
-#include "stdbool.h"
+#include <stdlib.h>
+#include <stdbool.h>
 #include <gb/gb.h>
+#include "allocate.h"
 
 #define MAX_TILES 255
 bool tile_in_use[MAX_TILES];
@@ -33,7 +34,7 @@ void reserve_tiles(struct tile_set* tiles, uint8_t nb_tiles) {
 }
 
 struct tile_set* alloc_tile_set(uint8_t nb_tiles) {
-    struct tile_set* tiles = malloc(sizeof(struct tile_set));
+    struct tile_set* tiles = allocate(sizeof(struct tile_set));
     reserve_tiles(tiles, nb_tiles);
     return tiles;
 }

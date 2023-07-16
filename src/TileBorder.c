@@ -3,6 +3,7 @@
 #include "../res/tile-border.h"
 #include <stdlib.h>
 #include <gb/gb.h>
+#include "allocate.h"
 
 inline static void _initialize_border_tiles(struct TileBorder* this) {
     this->border_tiles = alloc_tile_set(9);
@@ -25,7 +26,7 @@ inline static void _initialize_border_tiles(struct TileBorder* this) {
 }
 
 static struct TileBorder* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    struct TileBorder* tb = malloc(sizeof(struct TileBorder));
+    struct TileBorder* tb = allocate(sizeof(struct TileBorder));
     tb->_initialize_border_tiles = &_initialize_border_tiles;
 
     tb->x = x;
