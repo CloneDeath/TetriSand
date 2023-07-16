@@ -2,33 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "allocate.h"
-
-struct sand_chain* new_sand_chain(uint8_t y, uint8_t length, uint8_t value) {
-    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
-    chain->y = y;
-    chain->length = length;
-    chain->value = value;
-    chain->next = NULL;
-    return chain;
-}
-
-struct sand_chain* copy_sand_chain(struct sand_chain* copy) {
-    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
-    chain->y = copy->y;
-    chain->length = copy->length;
-    chain->value = copy->value;
-    chain->next = copy->next;
-    return chain;
-}
-
-void free_sand_chain(struct sand_chain* this) {
-    struct sand_chain* current = this;
-    while (current != NULL) {
-        struct sand_chain* next = current->next;
-        free(current);
-        current = next;
-    }
-}
+#include <stdio.h>
 
 struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
     struct sand_chain* current = this;
@@ -36,7 +10,7 @@ struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uin
         // if y is less than the current link
         if (y < current->y) {
             // make a copy of current
-            struct sand_chain* new = copy_sand_chain(current);
+            struct sand_chain* new = SandChain.copy(current);
 
             // and push it to the next chain
             current->next = new;
@@ -54,7 +28,7 @@ struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uin
         }
 
         if (!current->next) {
-            current->next = new_sand_chain(y, length, value);
+            current->next = SandChain.new(y, length, value);
             return current->next;
         }
         current = current->next;
@@ -91,7 +65,7 @@ uint8_t sand_chain__get_connected_length(struct sand_chain* this) {
 
 
 struct sand_chain* _split(struct sand_chain* this, uint8_t split_after) {
-    struct sand_chain* next = new_sand_chain(this->y + split_after, this->length - split_after, this->value);
+    struct sand_chain* next = SandChain.new(this->y + split_after, this->length - split_after, this->value);
     next->next = this->next;
     this->next = NULL;
     this->length = split_after;
@@ -137,5 +111,71 @@ void sand_chain__try_to_combine(struct sand_chain *this) {
     this->length += next->length;
     this->next = next->next;
     next->next = NULL;
-    free_sand_chain(next);
+    SandChain.delete(next);
 }
+
+/******* CLASS *******/
+
+uint16_t sand_chains = 0;
+
+static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
+    sand_chains++;
+
+    struct sand_chain* chain = malloc(sizeof(struct sand_chain));
+    if (chain == NULL) {
+        printf("OUT OF MEMORY\n");
+        printf("Sand Chains: %u", sand_chains);
+        exit(-1);
+    }
+    chain->y = y;
+    chain->length = length;
+    chain->value = value;
+    chain->next = NULL;
+    return chain;
+}
+
+static struct sand_chain* new_array(size_t count) {
+    sand_chains += count;
+
+    struct sand_chain* chain = calloc(count, sizeof(struct sand_chain));
+    if (chain == NULL) {
+        printf("OUT OF MEMORY\n");
+        printf("Sand Chains: %u", sand_chains);
+        exit(-1);
+    }
+    return chain;
+}
+
+static struct sand_chain* copy(struct sand_chain* original) {
+    sand_chains++;
+
+    struct sand_chain* chain = malloc(sizeof(struct sand_chain));
+    if (chain == NULL) {
+        printf("OUT OF MEMORY\n");
+        printf("Sand Chains: %u", sand_chains);
+        exit(-1);
+    }
+    chain->y = original->y;
+    chain->length = original->length;
+    chain->value = original->value;
+    chain->next = original->next;
+    return chain;
+}
+
+static void delete(struct sand_chain* this) {
+    sand_chains--;
+
+    struct sand_chain* current = this;
+    while (current != NULL) {
+        struct sand_chain* next = current->next;
+        free(current);
+        current = next;
+    }
+}
+
+const struct SandChainClass SandChain = {
+    .new=&new,
+    .new_array=&new_array,
+    .copy=&copy,
+    .delete=&delete
+};

@@ -19,7 +19,7 @@ void* allocate_array(size_t count, size_t size) {
     if (data == NULL) {
         HIDE_SPRITES;
         printf("OUT OF MEMORY\n");
-        printf("allocate_array %uh x 0x%x", count, size);
+        printf("allocate_array %hu x 0x%x", count, size);
         exit(-1);
     }
     return data;

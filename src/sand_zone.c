@@ -38,7 +38,7 @@ struct sand_zone* new_sand_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t hei
 
     initialize_inner_tiles(tz);
 
-    tz->sand_chains = allocate_array(tz->width * 8, sizeof(struct sand_chain));
+    tz->sand_chains = SandChain.new_array(tz->width * 8);
 
     tz->needs_update = allocate_array(tz->width * 8, sizeof(bool));
     tz->was_updated = allocate_array(tz->width * 8, sizeof(bool));
@@ -156,7 +156,7 @@ static inline void _set_sand_color_column(struct sand_zone* this, uint8_t x, uin
 static inline struct sand_chain* _get_or_create_destination_chain(struct sand_zone* this, uint8_t x){
     struct sand_chain *chain = &this->sand_chains[x];
     if (chain->y > 0) {
-        struct sand_chain* root = copy_sand_chain(chain);
+        struct sand_chain* root = SandChain.copy(chain);
         chain->next = root;
         chain->y = 0;
         chain->length = 0;
@@ -219,7 +219,7 @@ static inline void _collapse_empty_and_similar_chains(struct sand_zone* this) {
                 current->value = next->value;
                 current->next = next->next;
                 next->next = NULL;
-                free_sand_chain(next);
+                SandChain.delete(next);
                 continue;
             }
             sand_chain__try_to_combine(current);
