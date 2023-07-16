@@ -50,5 +50,5 @@ int main(void) {
     initrand(DIV_REG);
 
     run_game();
-
+    return 0;
 }
