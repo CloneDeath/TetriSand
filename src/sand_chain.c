@@ -74,7 +74,12 @@ struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
 }
 
 uint8_t sand_chain__get_gap_above(struct sand_chain* this) {
-    if (this->next == NULL) return 127;
+    if (this->next == NULL) {
+        return 255 - this->y - this->length;
+    }
+    if (this->next->y < this->y + this->length) {
+        return 127;
+    }
     return this->next->y - (this->y + this->length);
 }
 

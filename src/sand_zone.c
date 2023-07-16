@@ -274,7 +274,8 @@ void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t l
     struct sand_chain* chain = &this->sand_chains[x];
     struct sand_chain* new_chain = sand_chain__add_chain(chain, y, length, value);
 
-    for (uint8_t y_at = new_chain->y; y_at < new_chain->y + new_chain->length; y_at++){
+    uint8_t y_max = new_chain->y + new_chain->length;
+    for (uint8_t y_at = new_chain->y; y_at < y_max; y_at++){
         _set_sand_color(this, x, y_at, value);
     }
     _save_and_clear_tile_colors_cache();
