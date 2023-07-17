@@ -10,13 +10,14 @@ void initialize_inner_tiles(struct sand_zone* this) {
     uint8_t nb_tiles = this->width * this->height;
     this->inner_tiles = alloc_tile_set(nb_tiles);
 
+    const uint8_t zero[] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+    
     for (uint16_t z = 0; z < nb_tiles; z++) {
-        const uint8_t zero[] = {
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00
-        };
         set_bkg_data(this->inner_tiles->start + z, 1, zero);
     }
 

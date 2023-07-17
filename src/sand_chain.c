@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "allocate.h"
 #include <stdio.h>
+#include "global.h"
+#include "TextArea.h"
 
 struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
     struct sand_chain* current = this;
@@ -116,7 +118,13 @@ void sand_chain__try_to_combine(struct sand_chain *this) {
 
 /******* CLASS *******/
 
+uint16_t total_chains = 0;
+
 static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
+    total_chains++;
+    Debug.text->reset(Debug.text);
+    Debug.text->print_number(Debug.text, total_chains);
+
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = y;
     chain->length = length;
@@ -126,11 +134,19 @@ static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
 }
 
 static struct sand_chain* new_array(size_t count) {
+    total_chains+=count;
+    Debug.text->reset(Debug.text);
+    Debug.text->print_number(Debug.text, total_chains);
+
     struct sand_chain* chain = allocate_array(count, sizeof(struct sand_chain));
     return chain;
 }
 
 static struct sand_chain* copy(struct sand_chain* original) {
+    total_chains++;
+    Debug.text->reset(Debug.text);
+    Debug.text->print_number(Debug.text, total_chains);
+
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = original->y;
     chain->length = original->length;
@@ -142,10 +158,15 @@ static struct sand_chain* copy(struct sand_chain* original) {
 static void delete(struct sand_chain* this) {
     struct sand_chain* current = this;
     while (current != NULL) {
+        total_chains--;
         struct sand_chain* next = current->next;
         free(current);
         current = next;
     }
+
+
+    Debug.text->reset(Debug.text);
+    Debug.text->print_number(Debug.text, total_chains);
 }
 
 const struct SandChainClass SandChain = {

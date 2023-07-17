@@ -3,14 +3,22 @@
 #include "../res/TILES_digits.h"
 #include <stdio.h>
 #include <gb/gb.h>
+#include <stdbool.h>
 
 static void print_number(struct TextArea* this, int16_t value) {
     if (value < 0) {
         printf("TextArea does not support negative numbers!");
         exit(-1);
     }
-    if (value < 10) {
-        this->_put_digit(this, value);
+
+    for (int16_t d = 10000; d >= 1; d /= 10) {
+        int16_t v = value / d;
+        if (v == 0 && d != 1) {
+            continue;
+        }
+
+        int16_t digit = v % 10;
+        this->_put_digit(this, digit);
     }
 }
 
@@ -25,6 +33,8 @@ static void _put_digit(struct TextArea* this, uint8_t digit) {
     set_bkg_tile_xy(this->x + x_offset, this->y + y_offset, tile);
     this->_cursor++;
 }
+
+/******* CLASS *******/
 
 static inline void static_new() {
     if (TextArea._digits == NULL) {
