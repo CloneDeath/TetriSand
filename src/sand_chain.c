@@ -122,8 +122,8 @@ uint16_t total_chains = 0;
 
 static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
     total_chains++;
-    Debug.text->reset(Debug.text);
-    Debug.text->print_number(Debug.text, total_chains);
+    TextArea.reset(Debug.text);
+    TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = y;
@@ -135,8 +135,8 @@ static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
 
 static struct sand_chain* new_array(size_t count) {
     total_chains+=count;
-    Debug.text->reset(Debug.text);
-    Debug.text->print_number(Debug.text, total_chains);
+    TextArea.reset(Debug.text);
+    TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate_array(count, sizeof(struct sand_chain));
     return chain;
@@ -144,8 +144,8 @@ static struct sand_chain* new_array(size_t count) {
 
 static struct sand_chain* copy(struct sand_chain* original) {
     total_chains++;
-    Debug.text->reset(Debug.text);
-    Debug.text->print_number(Debug.text, total_chains);
+    TextArea.reset(Debug.text);
+    TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
     chain->y = original->y;
@@ -165,8 +165,8 @@ static void delete(struct sand_chain* this) {
     }
 
 
-    Debug.text->reset(Debug.text);
-    Debug.text->print_number(Debug.text, total_chains);
+    TextArea.reset(Debug.text);
+    TextArea.print_number(Debug.text, total_chains);
 }
 
 const struct SandChainClass SandChain = {
