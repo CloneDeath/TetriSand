@@ -48,7 +48,7 @@ static inline void static_new() {
 static struct TextArea* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     static_new();
 
-    struct TextArea* ta = allocate(sizeof(TextArea));
+    struct TextArea* ta = allocate(sizeof(struct TextArea));
     ta->x = x;
     ta->y = y;
     ta->width = width;
