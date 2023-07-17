@@ -122,7 +122,7 @@ uint16_t total_chains = 0;
 
 static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
     total_chains++;
-    TextArea.reset(Debug.text);
+    TextArea__clear(Debug.text);
     TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
@@ -135,7 +135,7 @@ static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
 
 static struct sand_chain* new_array(size_t count) {
     total_chains+=count;
-    TextArea.reset(Debug.text);
+    TextArea__clear(Debug.text);
     TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate_array(count, sizeof(struct sand_chain));
@@ -144,7 +144,7 @@ static struct sand_chain* new_array(size_t count) {
 
 static struct sand_chain* copy(struct sand_chain* original) {
     total_chains++;
-    TextArea.reset(Debug.text);
+    TextArea__clear(Debug.text);
     TextArea.print_number(Debug.text, total_chains);
 
     struct sand_chain* chain = allocate(sizeof(struct sand_chain));
@@ -165,7 +165,7 @@ static void delete(struct sand_chain* this) {
     }
 
 
-    TextArea.reset(Debug.text);
+    TextArea__clear(Debug.text);
     TextArea.print_number(Debug.text, total_chains);
 }
 

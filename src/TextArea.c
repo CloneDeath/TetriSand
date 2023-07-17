@@ -6,8 +6,9 @@
 #include <stdbool.h>
 
 struct tile_set *_digits;
+struct tile_set *_blank;
 
-static inline void _put_digit(struct TextArea* this, uint8_t digit) {
+static inline void _put_digit(struct TextArea *this, uint8_t digit) {
     uint8_t tile = digit + _digits->start;
     uint8_t x_offset = this->_cursor % this->width;
     uint8_t y_offset = (this->_cursor / this->width) % this->height;
@@ -15,7 +16,7 @@ static inline void _put_digit(struct TextArea* this, uint8_t digit) {
     this->_cursor++;
 }
 
-static void print_number(struct TextArea* this, int16_t value) {
+static void print_number(struct TextArea *this, int16_t value) {
     if (value < 0) {
         printf("TextArea does not support negative numbers!");
         exit(-1);
@@ -32,8 +33,19 @@ static void print_number(struct TextArea* this, int16_t value) {
     }
 }
 
-static void ta_reset(struct TextArea* this) {
+static void ta_reset(struct TextArea *this) {
     this->_cursor = 0;
+}
+
+void TextArea__clear(struct TextArea* this) {
+    ta_reset(this);
+
+    for (uint8_t x = 0; x < this->width; x++) {
+        for (uint8_t y = 0; y < this->height; y++) {
+            uint8_t tile = _blank->start;
+            set_bkg_tile_xy(this->x + x, this->y + y, tile);
+        }
+    }
 }
 
 /******* CLASS *******/
@@ -42,13 +54,23 @@ static inline void static_new() {
     if (_digits == NULL) {
         _digits = alloc_tile_set(TILES_digitsLen);
         tile_set__set_data(_digits, TILES_digits);
+
+        const uint8_t zero[] = {
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00
+        };
+
+        _blank = alloc_tile_set(1);
+        tile_set__set_data(_blank, zero);
     }
 }
 
-static struct TextArea* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+static struct TextArea *new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     static_new();
 
-    struct TextArea* ta = allocate(sizeof(struct TextArea));
+    struct TextArea *ta = allocate(sizeof(struct TextArea));
     ta->x = x;
     ta->y = y;
     ta->width = width;
@@ -56,7 +78,7 @@ static struct TextArea* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height)
     return ta;
 }
 
-static void delete(struct TextArea* this) {
+static void delete(struct TextArea *this) {
     free(this);
 }
 
