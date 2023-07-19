@@ -15,11 +15,16 @@ LCC = $(GBDK_HOME)bin/lcc
 # https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_toolchain_settings.html
 # -Wm-yc            GameBoy Color compatible
 # -Wm-yC            GameBoy Color only
+#
+# https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_rombanking_mbcs.html#autotoc_md91
+# -Wm-ya<N> where <N> is the number of RAM banks. 2, 4, 8, 16, 32
+# -Wm-yt<N> where <N> is the type of MBC cartridge (0x02: ROM+MBC1+RAM)
+#
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
-#LCCFLAGS = -Wm-yc
-LCCFLAGS = -Wm-yc -Wf--debug -Wl-y -Wl-w -Wl-m -O0
+#LCCFLAGS 	= -Wm-yc -Wm-yt0x02 -Wm-ya1
+LCCFLAGS 	= -Wm-yc -Wm-yt0x02 -Wm-ya1 -Wf--debug -Wl-y -Wl-w -Wl-m -O0
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
