@@ -9,6 +9,7 @@
 #include "../res/map-title.h"
 #include "TextArea.h"
 #include "global.h"
+#include "stdio.h"
 
 void show_title() {
     struct tile_set* set = alloc_tile_set(47);
@@ -47,7 +48,16 @@ void run_game() {
     delete_piece_master(pm);
 }
 
+volatile uint8_t* const RAM = 0xA000;
+
 int main(void) {
+    ENABLE_RAM_MBC1;
+
+    RAM[0] = 0x38;
+    uint8_t x = RAM[0];
+    printf("%x", x);
+    return 1;
+
     SHOW_BKG;
     SHOW_SPRITES;
     SPRITES_8x8;
