@@ -48,8 +48,6 @@ void run_game() {
     delete_piece_master(pm);
 }
 
-volatile uint8_t* const RAM = 0xA000;
-
 int main(void) {
     ENABLE_RAM_MBC1;
 
