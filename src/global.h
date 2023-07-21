@@ -1,8 +1,7 @@
 #pragma once
-#include "TextArea.h"
+#include "text_area.h"
 
-extern struct DebugClass {
-    struct TextArea* text;
+/******* CLASS *******/
+extern text_area* global__text;
 
-    void (*init)();
-} Debug;
+void global__init();

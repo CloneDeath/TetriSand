@@ -1,11 +1,8 @@
 #include "global.h"
-#include "TextArea.h"
+#include "text_area.h"
 
-static void init() {
-    Debug.text = TextArea.new(13, 1, 6, 16);
+text_area* global__text = NULL;
+
+void global__init() {
+    global__text = text_area__new(13, 1, 6, 16);
 }
-
-struct DebugClass Debug = {
-    .text=0,
-    .init=&init
-};
