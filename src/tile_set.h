@@ -2,12 +2,16 @@
 
 #include "stdint.h"
 
-struct tile_set {
+typedef struct tile_set_struct {
     uint8_t start;
     uint8_t count;
-};
+} tile_set;
 
-struct tile_set* alloc_tile_set(uint8_t nb_tiles);
-void free_tile_set(struct tile_set* this);
+/******* PUBLIC *******/
 
-void tile_set__set_data(struct tile_set* this, const uint8_t *data);
+void tile_set__set_data(tile_set* this, const uint8_t *data);
+
+/******* CLASS *******/
+
+tile_set* tile_set__alloc(uint8_t nb_tiles);
+void tile_set__free(tile_set* this);
