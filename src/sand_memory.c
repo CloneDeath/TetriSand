@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /******* PRIVATE CLASS MEMBERS *******/
 
@@ -29,9 +30,12 @@ inline static void __set_free(sand_chain* chain) {
 inline static void __set_used(sand_chain* chain) {
     chain->value = 254;
 }
-inline static void __set_array_used(sand_chain* start, size_t count) {
+inline static void __initialize_array(sand_chain* start, size_t count) {
     for (size_t i = 0; i < count; i++) {
         __set_used(start+i);
+        (start+i)->y = 0;
+        (start+i)->length = 0;
+        (start+i)->next = NULL;
     }
 }
 
@@ -88,8 +92,8 @@ sand_chain* sand_memory__calloc(size_t count) {
 
         if (current - start >= count) {
             first_free = current;
-            __set_array_used(current, count);
-            return current;
+            __initialize_array(start, count);
+            return start;
         }
     }
 
@@ -104,8 +108,8 @@ sand_chain* sand_memory__calloc(size_t count) {
 
         if (current - start >= count) {
             first_free = current;
-            __set_array_used(current, count);
-            return current;
+            __initialize_array(start, count);
+            return start;
         }
     }
 
