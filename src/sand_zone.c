@@ -6,52 +6,6 @@
 #include <gb/gb.h>
 #include "tile_set.h"
 
-void initialize_inner_tiles(struct sand_zone* this) {
-    uint8_t nb_tiles = this->width * this->height;
-    this->inner_tiles = alloc_tile_set(nb_tiles);
-
-    const uint8_t zero[] = {
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-    };
-    
-    for (uint16_t z = 0; z < nb_tiles; z++) {
-        set_bkg_data(this->inner_tiles->start + z, 1, zero);
-    }
-
-
-    for (uint8_t x = 0; x < this->width; x++) {
-        for (uint8_t y = 0; y < this->height; y++) {
-            uint8_t tile_offset = y * this->width + x;
-            set_bkg_tile_xy(this->x + x, this->y + y, this->inner_tiles->start + tile_offset);
-        }
-    }
-}
-
-struct sand_zone* new_sand_zone(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    struct sand_zone* tz = allocate(sizeof(struct sand_zone));
-    tz->x = x;
-    tz->y = y;
-    tz->width = width;
-    tz->height = height;
-
-    initialize_inner_tiles(tz);
-
-    tz->sand_chains = SandChain.new_array(tz->width * 8);
-
-    tz->needs_update = allocate_array(tz->width * 8, sizeof(bool));
-    tz->was_updated = allocate_array(tz->width * 8, sizeof(bool));
-
-    return tz;
-}
-
-void delete_sand_zone(struct sand_zone* this) {
-    free_tile_set(this->inner_tiles);
-    free(this);
-}
-
 static uint8_t tile_data[16];
 static uint8_t current_tile_index = 255; // Invalid tile index
 static bool needs_update = false;
@@ -118,7 +72,7 @@ static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y,
     needs_update = true;
 }
 
-static inline uint8_t _get_sand_color(struct sand_zone* this, uint8_t x, uint8_t y) {
+static inline uint8_t _get_sand_color(sand_zone* this, uint8_t x, uint8_t y) {
     uint8_t y_flipped = (this->height * 8 - 1) - y;
 
     uint8_t tile_x = x / 8;
@@ -130,7 +84,7 @@ static inline uint8_t _get_sand_color(struct sand_zone* this, uint8_t x, uint8_t
     return _get_tile_color_bit(tile_index, pixel_x, pixel_y);
 }
 
-static inline void _set_sand_color(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+static inline void _set_sand_color(sand_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     uint8_t y_flipped = (this->height * 8 - 1) - y;
 
     uint8_t tile_x = x / 8;
@@ -142,38 +96,38 @@ static inline void _set_sand_color(struct sand_zone* this, uint8_t x, uint8_t y,
     _set_tile_color_bit(tile_index, pixel_x, pixel_y, value);
 }
 
-static inline void _move_chain_down(struct sand_zone* this, uint8_t x, struct sand_chain* chain) {
+static inline void _move_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
     chain->y -= 1;
     _set_sand_color(this, x, chain->y, chain->value);
     _set_sand_color(this, x, chain->y + chain->length, DMG_WHITE);
 }
 
-static inline void _set_sand_color_column(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
+static inline void _set_sand_color_column(sand_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
     for (uint8_t i = 0; i < height; i++) {
         _set_sand_color(this, x, y + i, value);
     }
 }
 
-static inline struct sand_chain* _get_or_create_destination_chain(struct sand_zone* this, uint8_t x){
-    struct sand_chain *chain = &this->sand_chains[x];
+static inline sand_chain* _get_or_create_destination_chain(sand_zone* this, uint8_t x){
+    sand_chain *chain = &this->sand_chains[x];
     if (chain->y > 0) {
-        struct sand_chain* root = SandChain.copy(chain);
+        sand_chain* root = SandChain.copy(chain);
         chain->next = root;
         chain->y = 0;
         chain->length = 0;
         chain->value = 0;
         return chain;
     }
-    struct sand_chain *last_connected = sand_chain__get_last_connected(chain);
+    sand_chain *last_connected = sand_chain__get_last_connected(chain);
     return last_connected;
 }
 
-static inline void _slide_sand_chain(struct sand_zone* this, uint8_t x, uint8_t new_x) {
-    struct sand_chain* current = this->sand_chains[x].next;
+static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) {
+    sand_chain* current = this->sand_chains[x].next;
     if (current == NULL) return;
     if (current->y > 0) return; // sand-chain is still falling
 
-    struct sand_chain* dest = _get_or_create_destination_chain(this, new_x);
+    sand_chain* dest = _get_or_create_destination_chain(this, new_x);
 
     uint8_t target_y = dest->y + dest->length;
     uint8_t target_gap = sand_chain__get_gap_above(dest);
@@ -185,17 +139,17 @@ static inline void _slide_sand_chain(struct sand_zone* this, uint8_t x, uint8_t 
         uint8_t amount_to_move = ((current->y + connected_length) - target_y) - 1;
         if (amount_to_move > target_gap) amount_to_move = target_gap;
 
-        struct sand_chain* to_move = sand_chain__excise_chain(current, target_y + 1, amount_to_move);
+        sand_chain* to_move = sand_chain__excise_chain(current, target_y + 1, amount_to_move);
 
         _set_sand_color_column(this, x, to_move->y, amount_to_move, 0);
-        for (struct sand_chain* c = to_move; c != NULL; c = c->next) {
+        for (sand_chain* c = to_move; c != NULL; c = c->next) {
             c->y -= 1;
             _set_sand_color_column(this, new_x, c->y, c->length, c->value);
         }
 
-        struct sand_chain* dest_next = dest->next;
+        sand_chain* dest_next = dest->next;
         dest->next = to_move;
-        struct sand_chain* to_move_top = sand_chain__get_last_connected(to_move);
+        sand_chain* to_move_top = sand_chain__get_last_connected(to_move);
         to_move_top->next = dest_next;
 
         sand_chain__try_to_combine(dest);
@@ -206,14 +160,14 @@ static inline void _slide_sand_chain(struct sand_zone* this, uint8_t x, uint8_t 
     }
 }
 
-static inline void _collapse_empty_and_similar_chains(struct sand_zone* this) {
+static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
     uint8_t width = this->width * 8;
     for (uint8_t x = 0; x < width; x++) {
-        struct sand_chain *current = &this->sand_chains[x];
+        sand_chain *current = &this->sand_chains[x];
         current = current->next;
 
         while (current != NULL && current->next != NULL) {
-            struct sand_chain *next = current->next;
+            sand_chain *next = current->next;
             if (current->length == 0) {
                 current->y = next->y;
                 current->length = next->length;
@@ -229,7 +183,7 @@ static inline void _collapse_empty_and_similar_chains(struct sand_zone* this) {
     }
 }
 
-void sand_zone__update_sand(struct sand_zone* this) {
+void sand_zone__update_sand(sand_zone* this) {
     _collapse_empty_and_similar_chains(this);
 
     uint8_t width = this->width * 8;
@@ -241,13 +195,13 @@ void sand_zone__update_sand(struct sand_zone* this) {
     for (uint8_t x = 0; x < width; x++) {
         this->was_updated[x] = false;
 
-        struct sand_chain *chain = &this->sand_chains[x];
+        sand_chain *chain = &this->sand_chains[x];
         if (chain->y > 0) {
             _move_chain_down(this, x, chain);
             this->was_updated[x] = true;
         }
 
-        struct sand_chain *prev_chain = chain;
+        sand_chain *prev_chain = chain;
         chain = chain->next;
         while (chain) {
             if (chain->y > prev_chain->y + prev_chain->length) {
@@ -272,9 +226,9 @@ void sand_zone__update_sand(struct sand_zone* this) {
     _save_and_clear_tile_colors_cache();
 }
 
-void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
-    struct sand_chain* chain = &this->sand_chains[x];
-    struct sand_chain* new_chain = sand_chain__add_chain(chain, y, length, value);
+void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
+    sand_chain* chain = &this->sand_chains[x];
+    sand_chain* new_chain = sand_chain__add_chain(chain, y, length, value);
 
     uint8_t y_max = new_chain->y + new_chain->length;
     for (uint8_t y_at = new_chain->y; y_at < y_max; y_at++){
@@ -284,6 +238,56 @@ void sand_zone__add_sand(struct sand_zone* this, uint8_t x, uint8_t y, uint8_t l
     this->was_updated[x] = true;
 }
 
-bool sand_zone__has_sand_at(struct sand_zone* this, uint8_t x, uint8_t y) {
+bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) {
     return _get_sand_color(this, x, y) > 0;
+}
+
+/******* PRIVATE CLASS *******/
+
+void __initialize_inner_tiles(sand_zone* this) {
+    uint8_t nb_tiles = this->width * this->height;
+    this->inner_tiles = alloc_tile_set(nb_tiles);
+
+    const uint8_t zero[] = {
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00
+    };
+
+    for (uint16_t z = 0; z < nb_tiles; z++) {
+        set_bkg_data(this->inner_tiles->start + z, 1, zero);
+    }
+
+
+    for (uint8_t x = 0; x < this->width; x++) {
+        for (uint8_t y = 0; y < this->height; y++) {
+            uint8_t tile_offset = y * this->width + x;
+            set_bkg_tile_xy(this->x + x, this->y + y, this->inner_tiles->start + tile_offset);
+        }
+    }
+}
+
+/******* PUBLIC CLASS *******/
+
+sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    sand_zone* tz = allocate(sizeof(sand_zone));
+    tz->x = x;
+    tz->y = y;
+    tz->width = width;
+    tz->height = height;
+
+    __initialize_inner_tiles(tz);
+
+    tz->sand_chains = sand_chain__new_array(tz->width * 8);
+
+    tz->needs_update = allocate_array(tz->width * 8, sizeof(bool));
+    tz->was_updated = allocate_array(tz->width * 8, sizeof(bool));
+
+    return tz;
+}
+
+void sand_zone__delete(sand_zone* this) {
+    free_tile_set(this->inner_tiles);
+    free(this);
 }

@@ -62,7 +62,7 @@ sand_chain* sand_memory__alloc() {
         current++;
     }
 
-    printf("FATAL - Ran out of Sand Memory.")
+    printf("FATAL - Ran out of Sand Memory.");
     exit(-1);
 }
 
@@ -101,7 +101,7 @@ sand_chain* sand_memory__calloc(size_t count) {
         }
     }
 
-    printf("FATAL - Ran out of Sand Memory.")
+    printf("FATAL - Ran out of Sand Memory.");
     exit(-1);
 }
 

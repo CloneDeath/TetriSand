@@ -1,5 +1,4 @@
 #include "allocate.h"
-#include <stdlib.h>
 #include <stdio.h>
 #include <gb/gb.h>
 

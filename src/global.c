@@ -1,5 +1,6 @@
 #include "global.h"
 #include "text_area.h"
+#include "stddef.h"
 
 text_area* global__text = NULL;
 

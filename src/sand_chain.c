@@ -4,15 +4,27 @@
 #include "allocate.h"
 #include <stdio.h>
 #include "global.h"
-#include "TextArea.h"
+#include "text_area.h"
 
-struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
-    struct sand_chain* current = this;
+/******* PRIVATE INSTANCE *******/
+
+sand_chain* _split(sand_chain* this, uint8_t split_after) {
+    sand_chain* next = sand_chain__new(this->y + split_after, this->length - split_after, this->value);
+    next->next = this->next;
+    this->next = NULL;
+    this->length = split_after;
+    return next;
+}
+
+/******* PUBLIC INSTANCE *******/
+
+sand_chain* sand_chain__add_chain(sand_chain* this, uint8_t y, uint8_t length, uint8_t value) {
+    sand_chain* current = this;
     while (true) {
         // if y is less than the current link
         if (y < current->y) {
             // make a copy of current
-            struct sand_chain* new = SandChain.copy(current);
+            sand_chain* new = sand_chain__copy(current);
 
             // and push it to the next chain
             current->next = new;
@@ -30,16 +42,16 @@ struct sand_chain* sand_chain__add_chain(struct sand_chain* this, uint8_t y, uin
         }
 
         if (!current->next) {
-            current->next = SandChain.new(y, length, value);
+            current->next = sand_chain__new(y, length, value);
             return current->next;
         }
         current = current->next;
     }
 }
 
-struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
-    struct sand_chain* previous = this;
-    struct sand_chain* current = this->next;
+sand_chain* sand_chain__get_last_connected(sand_chain* this) {
+    sand_chain* previous = this;
+    sand_chain* current = this->next;
     while (current != NULL) {
         if (current->y > previous->y + previous->length) {
             return previous;
@@ -50,7 +62,7 @@ struct sand_chain* sand_chain__get_last_connected(struct sand_chain* this) {
     return previous;
 }
 
-uint8_t sand_chain__get_gap_above(struct sand_chain* this) {
+uint8_t sand_chain__get_gap_above(sand_chain* this) {
     if (this->next == NULL) {
         return 255 - this->y - this->length;
     }
@@ -60,31 +72,22 @@ uint8_t sand_chain__get_gap_above(struct sand_chain* this) {
     return this->next->y - (this->y + this->length);
 }
 
-uint8_t sand_chain__get_connected_length(struct sand_chain* this) {
-    struct sand_chain* last = sand_chain__get_last_connected(this);
+uint8_t sand_chain__get_connected_length(sand_chain* this) {
+    sand_chain* last = sand_chain__get_last_connected(this);
     return last->y + last->length - this->y;
 }
 
-
-struct sand_chain* _split(struct sand_chain* this, uint8_t split_after) {
-    struct sand_chain* next = SandChain.new(this->y + split_after, this->length - split_after, this->value);
-    next->next = this->next;
-    this->next = NULL;
-    this->length = split_after;
-    return next;
-}
-
-struct sand_chain* sand_chain__excise_chain(struct sand_chain* this, uint8_t from, uint8_t length) {
+sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t length) {
     // find first chain to excise from
-    struct sand_chain* first_chain = this;
+    sand_chain* first_chain = this;
     while (first_chain != NULL) {
         if (first_chain->y <= from && first_chain->y + first_chain->length > from) break;
         first_chain = first_chain->next;
     }
 
     uint8_t split_after = from - first_chain->y;
-    struct sand_chain* split_chain = _split(first_chain, split_after);
-    struct sand_chain* current = split_chain;
+    sand_chain* split_chain = _split(first_chain, split_after);
+    sand_chain* current = split_chain;
 
     uint8_t total = current->length;
     while (total < length) {
@@ -94,7 +97,7 @@ struct sand_chain* sand_chain__excise_chain(struct sand_chain* this, uint8_t fro
     }
     if (total > length) {
         uint8_t extra_length = total - length;
-        struct sand_chain* split_last = _split(current, current->length - extra_length);
+        sand_chain* split_last = _split(current, current->length - extra_length);
         first_chain->next = split_last;
         return split_chain;
     } else {
@@ -104,8 +107,8 @@ struct sand_chain* sand_chain__excise_chain(struct sand_chain* this, uint8_t fro
     }
 }
 
-void sand_chain__try_to_combine(struct sand_chain *this) {
-    struct sand_chain* next = this->next;
+void sand_chain__try_to_combine(sand_chain *this) {
+    sand_chain* next = this->next;
     if (next == NULL) return;
     if (this->value != next->value) return;
     if (this->y + this->length < next->y) return;
@@ -113,19 +116,19 @@ void sand_chain__try_to_combine(struct sand_chain *this) {
     this->length += next->length;
     this->next = next->next;
     next->next = NULL;
-    SandChain.delete(next);
+    sand_chain__delete(next);
 }
 
 /******* CLASS *******/
 
 uint16_t total_chains = 0;
 
-static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
+sand_chain* sand_chain__new(uint8_t y, uint8_t length, uint8_t value) {
     total_chains++;
-    TextArea__clear(Debug.text);
-    TextArea.print_number(Debug.text, total_chains);
+    text_area__reset(global__text);
+    text_area__print_number(global__text, total_chains);
 
-    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
+    sand_chain* chain = allocate(sizeof(sand_chain));
     chain->y = y;
     chain->length = length;
     chain->value = value;
@@ -133,21 +136,21 @@ static struct sand_chain* new(uint8_t y, uint8_t length, uint8_t value) {
     return chain;
 }
 
-static struct sand_chain* new_array(size_t count) {
+sand_chain* sand_chain__new_array(size_t count) {
     total_chains+=count;
-    TextArea__clear(Debug.text);
-    TextArea.print_number(Debug.text, total_chains);
+    text_area__reset(global__text);
+    text_area__print_number(global__text, total_chains);
 
-    struct sand_chain* chain = allocate_array(count, sizeof(struct sand_chain));
+    sand_chain* chain = allocate_array(count, sizeof(sand_chain));
     return chain;
 }
 
-static struct sand_chain* copy(struct sand_chain* original) {
+sand_chain* sand_chain__copy(sand_chain* original) {
     total_chains++;
-    TextArea__clear(Debug.text);
-    TextArea.print_number(Debug.text, total_chains);
+    text_area__reset(global__text);
+    text_area__print_number(global__text, total_chains);
 
-    struct sand_chain* chain = allocate(sizeof(struct sand_chain));
+    sand_chain* chain = allocate(sizeof(sand_chain));
     chain->y = original->y;
     chain->length = original->length;
     chain->value = original->value;
@@ -155,23 +158,15 @@ static struct sand_chain* copy(struct sand_chain* original) {
     return chain;
 }
 
-static void delete(struct sand_chain* this) {
-    struct sand_chain* current = this;
+void sand_chain__delete(sand_chain* this) {
+    sand_chain* current = this;
     while (current != NULL) {
         total_chains--;
-        struct sand_chain* next = current->next;
+        sand_chain* next = current->next;
         free(current);
         current = next;
     }
 
-
-    TextArea__clear(Debug.text);
-    TextArea.print_number(Debug.text, total_chains);
+    text_area__reset(global__text);
+    text_area__print_number(global__text, total_chains);
 }
-
-const struct SandChainClass SandChain = {
-    .new=&new,
-    .new_array=&new_array,
-    .copy=&copy,
-    .delete=&delete
-};
