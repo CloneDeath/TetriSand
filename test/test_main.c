@@ -4,9 +4,9 @@
 #include "../src/sand_chain.h"
 
 void excise_chain_works(void) {
-    struct sand_chain* chain = SandChain.new(0, 10, 3);
+    sand_chain* chain = sand_chain__new(0, 10, 3);
 
-    struct sand_chain* split = sand_chain__excise_chain(chain, 3, 5);
+    sand_chain* split = sand_chain__excise_chain(chain, 3, 5);
 
     ASSERT(chain->y == 0);
     ASSERT(chain->length == 3);
@@ -24,8 +24,8 @@ void excise_chain_works(void) {
     ASSERT(split->value == 3);
     ASSERT(split->next == NULL);
 
-    SandChain.delete(chain);
-    SandChain.delete(split);
+    sand_chain__delete(chain);
+    sand_chain__delete(split);
 }
 
 const struct test test_list[] = {

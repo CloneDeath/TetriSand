@@ -1,12 +1,14 @@
-#include "TileBorder.h"
+#include "allocate.h"
+#include "tile_border.h"
 #include "tile_set.h"
 #include "../res/tile-border.h"
 #include <stdlib.h>
 #include <gb/gb.h>
-#include "allocate.h"
 
-inline static void _initialize_border_tiles(struct TileBorder* this) {
-    this->border_tiles = alloc_tile_set(9);
+/******* PRIVATE CLASS *******/
+
+inline static void _initialize_border_tiles(tile_border* this) {
+    this->border_tiles = tile_set__alloc(9);
 
     tile_set__set_data(this->border_tiles, TILE_Border);
 
@@ -25,26 +27,22 @@ inline static void _initialize_border_tiles(struct TileBorder* this) {
     }
 }
 
-static struct TileBorder* new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-    struct TileBorder* tb = allocate(sizeof(struct TileBorder));
-    tb->_initialize_border_tiles = &_initialize_border_tiles;
+/******* PUBLIC CLASS *******/
+
+tile_border* tile_border__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+    tile_border* tb = allocate(sizeof(tile_border));
 
     tb->x = x;
     tb->y = y;
     tb->width = width;
     tb->height = height;
-    tb->_initialize_border_tiles(tb);
+    _initialize_border_tiles(tb);
     return tb;
 }
 
-static void delete(struct TileBorder* this) {
-    free_tile_set(this->border_tiles);
+void tile_border__delete(tile_border* this) {
+    tile_set__free(this->border_tiles);
     free(this);
 }
-
-const struct TileBorderClass TileBorder = {
-    .new=&new,
-    .delete=&delete
-};
 
 

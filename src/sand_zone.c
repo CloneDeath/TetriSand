@@ -111,7 +111,7 @@ static inline void _set_sand_color_column(sand_zone* this, uint8_t x, uint8_t y,
 static inline sand_chain* _get_or_create_destination_chain(sand_zone* this, uint8_t x){
     sand_chain *chain = &this->sand_chains[x];
     if (chain->y > 0) {
-        sand_chain* root = SandChain.copy(chain);
+        sand_chain* root = sand_chain__copy(chain);
         chain->next = root;
         chain->y = 0;
         chain->length = 0;
@@ -174,7 +174,7 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
                 current->value = next->value;
                 current->next = next->next;
                 next->next = NULL;
-                SandChain.delete(next);
+                sand_chain__delete(next);
                 continue;
             }
             sand_chain__try_to_combine(current);
@@ -246,7 +246,7 @@ bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) {
 
 void __initialize_inner_tiles(sand_zone* this) {
     uint8_t nb_tiles = this->width * this->height;
-    this->inner_tiles = alloc_tile_set(nb_tiles);
+    this->inner_tiles = tile_set__alloc(nb_tiles);
 
     const uint8_t zero[] = {
         0x00, 0x00, 0x00, 0x00,
@@ -288,6 +288,6 @@ sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
 }
 
 void sand_zone__delete(sand_zone* this) {
-    free_tile_set(this->inner_tiles);
+    tile_set__free(this->inner_tiles);
     free(this);
 }

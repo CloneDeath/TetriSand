@@ -3,14 +3,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "sand_chain.h"
+#include "tile_set.h"
 
 typedef struct sand_zone_struct {
     uint8_t x;
     uint8_t y;
     uint8_t width;
     uint8_t height;
-    struct tile_set* inner_tiles;
-    struct sand_chain* sand_chains;
+    tile_set* inner_tiles;
+    sand_chain* sand_chains;
 
     bool* needs_update;
     bool* was_updated;

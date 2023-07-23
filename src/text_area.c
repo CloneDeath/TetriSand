@@ -27,7 +27,6 @@ void text_area__pop_char(text_area* this) {
 
 void text_area__put_digit(text_area* this, uint8_t digit) {
     assert(digit < 10);
-    assert(digit >= 0);
 
     uint8_t tile = digit + _digits->start;
     uint8_t x_offset = this->_cursor % this->width;
@@ -49,7 +48,7 @@ void text_area__print_number(text_area* this, int16_t value) {
         }
 
         int16_t digit = v % 10;
-        __put_digit(this, digit);
+        text_area__put_digit(this, digit);
     }
 }
 

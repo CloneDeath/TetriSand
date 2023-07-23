@@ -10,8 +10,8 @@
 
 volatile uint8_t* const RAM = 0xA000;
 
-volatile sand_chain* const sand_start = (sand_chain*)RAM;
-volatile sand_chain* const sand_end = (sand_chain*)(RAM + 0x2000);
+volatile sand_chain* const sand_start = (sand_chain*)0xA000;
+volatile sand_chain* const sand_end = (sand_chain*)(0xA000 + 0x2000);
 
 sand_chain* first_free = NULL;
 
@@ -64,6 +64,7 @@ sand_chain* sand_memory__alloc() {
 
     printf("FATAL - Ran out of Sand Memory.");
     exit(-1);
+    return NULL;
 }
 
 sand_chain* sand_memory__calloc(size_t count) {
@@ -103,6 +104,7 @@ sand_chain* sand_memory__calloc(size_t count) {
 
     printf("FATAL - Ran out of Sand Memory.");
     exit(-1);
+    return NULL;
 }
 
 void sand_memory__free(sand_chain* pointer) {
