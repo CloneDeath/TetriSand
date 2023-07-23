@@ -1,10 +1,11 @@
 #include "sand_chain.h"
-#include <stdlib.h>
-#include <stdbool.h>
-#include "allocate.h"
-#include <stdio.h>
+#include "sand_memory.h"
 #include "global.h"
 #include "text_area.h"
+
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 /******* PRIVATE INSTANCE *******/
 
@@ -128,7 +129,7 @@ sand_chain* sand_chain__new(uint8_t y, uint8_t length, uint8_t value) {
     text_area__reset(global__text);
     text_area__print_number(global__text, total_chains);
 
-    sand_chain* chain = allocate(sizeof(sand_chain));
+    sand_chain* chain = sand_memory__alloc();
     chain->y = y;
     chain->length = length;
     chain->value = value;
@@ -141,7 +142,7 @@ sand_chain* sand_chain__new_array(size_t count) {
     text_area__reset(global__text);
     text_area__print_number(global__text, total_chains);
 
-    sand_chain* chain = allocate_array(count, sizeof(sand_chain));
+    sand_chain* chain = sand_memory__calloc(count);
     return chain;
 }
 
@@ -150,7 +151,7 @@ sand_chain* sand_chain__copy(sand_chain* original) {
     text_area__reset(global__text);
     text_area__print_number(global__text, total_chains);
 
-    sand_chain* chain = allocate(sizeof(sand_chain));
+    sand_chain* chain = sand_memory__alloc();
     chain->y = original->y;
     chain->length = original->length;
     chain->value = original->value;
@@ -163,7 +164,7 @@ void sand_chain__delete(sand_chain* this) {
     while (current != NULL) {
         total_chains--;
         sand_chain* next = current->next;
-        free(current);
+        sand_memory__free(current);
         current = next;
     }
 

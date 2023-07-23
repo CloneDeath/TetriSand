@@ -37,9 +37,16 @@ inline static void __set_array_used(sand_chain* start, size_t count) {
 
 /******* CLASS *******/
 
+void __init_memory() {
+    first_free = (sand_chain*)sand_start;
+    for (sand_chain* c = (sand_chain*)sand_start; c < sand_end; c++) {
+        __set_free(c);
+    }
+}
+
 sand_chain* sand_memory__alloc() {
     if (first_free == NULL) {
-        first_free = (sand_chain*)sand_start;
+        __init_memory();
     }
     sand_chain* current = first_free;
     while (current < sand_end) {
@@ -69,7 +76,7 @@ sand_chain* sand_memory__alloc() {
 
 sand_chain* sand_memory__calloc(size_t count) {
     if (first_free == NULL) {
-        first_free = (sand_chain*)sand_start;
+        __init_memory();
     }
     sand_chain* start = first_free;
     sand_chain* current = first_free;
@@ -108,7 +115,7 @@ sand_chain* sand_memory__calloc(size_t count) {
 }
 
 void sand_memory__free(sand_chain* pointer) {
-    assert(!__is_free(pointer));
+    assert(__is_used(pointer));
     if (pointer < first_free) first_free = pointer;
     __set_free(pointer);
 }
