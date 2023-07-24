@@ -7,6 +7,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <gb/gb.h>
+
 /******* PRIVATE CLASS MEMBERS *******/
 
 volatile uint8_t* const RAM = 0xA000;
@@ -73,7 +75,8 @@ sand_chain* sand_memory__alloc() {
         current++;
     }
 
-    printf("FATAL - Ran out of Sand Memory.");
+    HIDE_SPRITES;
+    printf("FATAL - Out of Dedicated Sand Memory.");
     exit(-1);
     return NULL;
 }
@@ -113,7 +116,8 @@ sand_chain* sand_memory__calloc(size_t count) {
         }
     }
 
-    printf("FATAL - Ran out of Sand Memory.");
+    HIDE_SPRITES;
+    printf("FATAL - Out of Dedicated Sand Memory.");
     exit(-1);
     return NULL;
 }
