@@ -1,18 +1,22 @@
-#include <gb/gb.h>
 #include "gameplay/sand_zone.h"
 #include "gameplay/piece_master.h"
-#include <stdbool.h>
-#include <rand.h>
-
-#include "../res/TITLE/TILES_Title.h"
-#include "../res/TITLE/MAP_Title.h"
-
 #include "tile_border.h"
 #include "tile_set.h"
 #include "text_area.h"
 #include "global.h"
+#include "sound/music.h"
+
+#include "../res/TITLE/TILES_Title.h"
+#include "../res/TITLE/MAP_Title.h"
+
+
+#include <stdbool.h>
+#include <rand.h>
+#include <gb/gb.h>
 
 void show_title() {
+    music__init();
+
     uint8_t previous_bank = CURRENT_BANK;
     SWITCH_ROM( BANK(TILES_Title) );
 
@@ -23,6 +27,7 @@ void show_title() {
     set_bkg_based_tiles(0, 0, MAP_TitleWidth, MAP_TitleHeight, MAP_Title, set->start);
 
     while(true) {
+        music__update();
         uint8_t input = joypad();
         if (input) break;
 
