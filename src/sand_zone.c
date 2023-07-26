@@ -1,3 +1,5 @@
+#pragma bank 255
+
 #include "sand_zone.h"
 #include "allocate.h"
 #include "tile_set.h"
@@ -5,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include <gb/gb.h>
 
@@ -86,7 +89,6 @@ static inline uint8_t _get_sand_color(sand_zone* this, uint8_t x, uint8_t y) {
     return _get_tile_color_bit(tile_index, pixel_x, pixel_y);
 }
 
-#include "stdio.h"
 static inline void _set_sand_color(sand_zone* this, uint8_t x, uint8_t y, uint8_t value) {
     if (x > this->width * 8 || y > this->height * 8) {
         HIDE_SPRITES;
@@ -199,7 +201,9 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
     }
 }
 
-void sand_zone__update_sand(sand_zone* this) {
+/******* PUBLIC INSTANCE *******/
+
+void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
 
     uint8_t width = this->width * 8;
@@ -242,7 +246,7 @@ void sand_zone__update_sand(sand_zone* this) {
     _save_and_clear_tile_colors_cache();
 }
 
-void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) {
+void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) BANKED {
     sand_chain* chain = &this->sand_chains[x];
     sand_chain* new_chain = sand_chain__add_chain(chain, y, length, value);
 
@@ -254,7 +258,7 @@ void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, 
     this->was_updated[x] = true;
 }
 
-bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) {
+bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED {
     return _get_sand_color(this, x, y) > 0;
 }
 
@@ -286,7 +290,7 @@ void __initialize_inner_tiles(sand_zone* this) {
 
 /******* PUBLIC CLASS *******/
 
-sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) BANKED {
     sand_zone* tz = allocate(sizeof(sand_zone));
     tz->x = x;
     tz->y = y;
@@ -303,7 +307,7 @@ sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     return tz;
 }
 
-void sand_zone__delete(sand_zone* this) {
+void sand_zone__delete(sand_zone* this) BANKED {
     tile_set__free(this->inner_tiles);
     free(this);
 }

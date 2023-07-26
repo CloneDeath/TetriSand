@@ -18,10 +18,10 @@ typedef struct sand_zone_struct {
 } sand_zone;
 
 /******* INSTANCE *******/
-void sand_zone__update_sand(sand_zone* this);
-void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value);
-bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y);
+void sand_zone__update_sand(sand_zone* this) BANKED;
+void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) BANKED;
+bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED;
 
 /******* CLASS *******/
-sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
-void sand_zone__delete(sand_zone* this);
+sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) BANKED;
+void sand_zone__delete(sand_zone* this) BANKED;
