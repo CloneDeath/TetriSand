@@ -99,36 +99,53 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
 }
 
 static inline sand_chain* _get_matching_sand_chain(sand_zone* this, sand_chain* target, uint8_t x) {
-    if (target->length == 0 || target->value) return NULL;
+    if (target->length == 0 || target->value == 0) {
+        printf("GOT BAD TARGET\n");
+        return NULL;
+    }
     uint8_t start = target->y;
     uint8_t end = target->y + target->length - 1;
     uint8_t value = target->value;
 
     sand_chain* current = this->sand_chains[x].next;
     while (current != NULL) {
-        if (current->y > end + 1) return NULL;
+        if (current->y > end + 1) {
+            printf("BEYOND END\n");
+            return NULL;
+        }
         if (current->y + current->length < start - 1) {
+            printf("TOO LOW\n");
             current = current->next;
             continue;
         }
         if (current->value != value) {
+            printf("WRONG VALUE\n");
             current = current->next;
             continue;
         }
+        printf("FOUND = 0x%x\n", current);
         return current;
     }
+    printf("GOT NULL\n");
     return NULL;
 }
 
 static inline void _check_for_tetris(sand_zone* this) {
     int8_t width = this->width * 8;
+    if (this->sand_chains[0].next == NULL) return;
+
     sand_chain** stack = allocate_array(width, sizeof(sand_chain*));
     stack[0] = this->sand_chains[0].next;
     int8_t stack_index = 0;
 
     while (stack_index >= 0 && stack_index < width) {
+        printf("\n");
+        printf("SI = 0x%x\n", stack_index);
         sand_chain* current = stack[stack_index];
+        printf("CURRENT = 0x%x\n", current);
         sand_chain* next = _get_matching_sand_chain(this, current, stack_index+1);
+        printf("NEXT = 0x%x\n", next);
+
         if (next == NULL) {
             current = current->next;
             stack[stack_index] = current;
@@ -138,8 +155,7 @@ static inline void _check_for_tetris(sand_zone* this) {
             continue;
         }
 
-        stack[stack_index+1] = next;
-        stack_index++;
+        stack[++stack_index] = next;
     }
 
     if (stack_index < 0) {
@@ -161,6 +177,7 @@ static inline void _check_for_tetris(sand_zone* this) {
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
+    _check_for_tetris(this);
 
     uint8_t width = this->width * 8;
 
@@ -199,7 +216,6 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         _slide_sand_chain(this, x - 1, x);
     }
 
-    _check_for_tetris(this);
     bitmap_area__flush_cache();
 }
 
