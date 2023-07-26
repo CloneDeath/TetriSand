@@ -147,6 +147,8 @@ static inline bool _piece_is_touching_sand(piece_master* this) {
 /******* PUBLIC INSTANCE *******/
 
 void piece_master__update(piece_master *this) BANKED {
+    if (this->game_over) return;
+
     if (this->needs_new_piece) {
         this->needs_new_piece = false;
         this->x = _get_center_x(this);
@@ -154,6 +156,10 @@ void piece_master__update(piece_master *this) BANKED {
         this->current_piece = rand() % NUMBER_OF_PIECES;
         this->rotated = rand() % 4;
         _set_color(this, (rand() % 3) + 1);
+        if (_piece_is_touching_sand(this)) {
+            this->game_over = true;
+            return;
+        }
     }
 
     this->previous_input = this->current_input;
@@ -189,6 +195,7 @@ piece_master *piece_master__new(sand_zone *zone) BANKED {
     set_sprite_data(0, 4, Tetromino);
 
     piece_master* this = allocate(sizeof(piece_master));
+    this->game_over = false;
     this->x = 0;
     this->y = 0;
     this->current_piece = O;

@@ -9,6 +9,10 @@ enum piece_type {
 };
 
 typedef struct piece_master_struct {
+    // public:
+    bool game_over;
+
+    // private:
     enum piece_type current_piece;
     uint8_t x;
     uint8_t y;
