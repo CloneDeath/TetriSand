@@ -4,14 +4,15 @@
 #include <stdint.h>
 #include "sand_chain.h"
 #include "tile_set.h"
+#include "engine/bitmap_area.h"
 
 typedef struct sand_zone_struct {
     uint8_t x;
     uint8_t y;
     uint8_t width;
     uint8_t height;
-    tile_set* inner_tiles;
     sand_chain* sand_chains;
+    bitmap_area* bitmap_area;
 
     bool* needs_update;
     bool* was_updated;

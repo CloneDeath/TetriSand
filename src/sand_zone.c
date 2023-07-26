@@ -11,118 +11,15 @@
 
 #include <gb/gb.h>
 
-static uint8_t tile_data[16];
-static uint8_t current_tile_index = 255; // Invalid tile index
-static bool needs_update = false;
-
-static inline void _load_tile_colors_into_cache(uint8_t tile_index) {
-    if (tile_index == current_tile_index) return;
-
-    // Save the modified data of the current tile before loading new tile
-    if (needs_update && current_tile_index != 255) {
-        set_bkg_data(current_tile_index, 1, tile_data);
-    }
-
-    // Load the new tile data
-    get_bkg_data(tile_index, 1, tile_data);
-    current_tile_index = tile_index;
-    needs_update = false;
-}
-
-static inline void _save_and_clear_tile_colors_cache() {
-    if (needs_update && current_tile_index != 255) {
-        set_bkg_data(current_tile_index, 1, tile_data);
-    }
-    current_tile_index = 255;
-    needs_update = false;
-}
-
-static inline uint8_t _get_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y) {
-    _load_tile_colors_into_cache(tile_index);
-
-    uint8_t rowL = tile_data[y * 2 + 0];
-    uint8_t rowH = tile_data[y * 2 + 1];
-
-    // Extract the bits corresponding to the pixel at position (x, y)
-    uint8_t lowerBit = (rowL >> (7 - x)) & 1;
-    uint8_t upperBit = (rowH >> (7 - x)) & 1;
-
-    // Combine the bits to get the color value
-    uint8_t value = (upperBit << 1) | lowerBit;
-
-    return value;
-}
-
-static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
-    _load_tile_colors_into_cache(tile_index);
-
-    uint8_t rowL = tile_data[y * 2 + 0];
-    uint8_t rowH = tile_data[y * 2 + 1];
-
-    // Limit value to two bits (0-3)
-    value &= 3;
-
-    // Clear the bits
-    rowL &= ~(1 << (7 - x));
-    rowH &= ~(1 << (7 - x));
-
-    // Set the new bits
-    rowL |= (value & 1) << (7 - x);
-    rowH |= (value >> 1) << (7 - x);
-
-    // Store the modified bytes back into the tile data
-    tile_data[y * 2 + 0] = rowL;
-    tile_data[y * 2 + 1] = rowH;
-
-    needs_update = true;
-}
-
-static inline uint8_t _get_sand_color(sand_zone* this, uint8_t x, uint8_t y) {
-    uint8_t y_flipped = (this->height * 8 - 1) - y;
-
-    uint8_t tile_x = x / 8;
-    uint8_t tile_y = y_flipped / 8;
-    uint8_t tile_offset = this->width * tile_y + tile_x;
-    uint8_t tile_index = this->inner_tiles->start + tile_offset;
-    uint8_t pixel_x = x % 8;
-    uint8_t pixel_y = y_flipped % 8;
-    return _get_tile_color_bit(tile_index, pixel_x, pixel_y);
-}
-
-static inline void _set_sand_color(sand_zone* this, uint8_t x, uint8_t y, uint8_t value) {
-    if (x > this->width * 8 || y > this->height * 8) {
-        HIDE_SPRITES;
-        printf("BOUNDS FAULT - %hu %hu", x, y);
-        exit(-1);
-    }
-
-    uint8_t y_flipped = (this->height * 8 - 1) - y;
-
-    uint8_t tile_x = x / 8;
-    uint8_t tile_y = y_flipped / 8;
-    uint8_t tile_offset = this->width * tile_y + tile_x;
-    uint8_t tile_index = this->inner_tiles->start + tile_offset;
-    uint8_t pixel_x = x % 8;
-    uint8_t pixel_y = y_flipped % 8;
-
-    if (tile_index < this->inner_tiles->start || tile_index > this->inner_tiles->start + this->inner_tiles->count) {
-        HIDE_SPRITES;
-        printf("INDEX FAULT - %hu %hu %hu", x, y, tile_index);
-        exit(-1);
-    }
-
-    _set_tile_color_bit(tile_index, pixel_x, pixel_y, value);
-}
-
 static inline void _move_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
     chain->y -= 1;
-    _set_sand_color(this, x, chain->y, chain->value);
-    _set_sand_color(this, x, chain->y + chain->length, DMG_WHITE);
+    bitmap_area__set_color(this->bitmap_area, x, chain->y, chain->value);
+    bitmap_area__set_color(this->bitmap_area, x, chain->y + chain->length, DMG_WHITE);
 }
 
 static inline void _set_sand_color_column(sand_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
     for (uint8_t i = 0; i < height; i++) {
-        _set_sand_color(this, x, y + i, value);
+        bitmap_area__set_color(this->bitmap_area, x, y + i, value);
     }
 }
 
@@ -243,7 +140,7 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         _slide_sand_chain(this, x - 1, x);
     }
 
-    _save_and_clear_tile_colors_cache();
+    bitmap_area__flush_cache();
 }
 
 void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, uint8_t value) BANKED {
@@ -252,40 +149,14 @@ void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, 
 
     uint8_t y_max = new_chain->y + new_chain->length;
     for (uint8_t y_at = new_chain->y; y_at < y_max; y_at++){
-        _set_sand_color(this, x, y_at, value);
+        bitmap_area__set_color(this->bitmap_area, x, y_at, value);
     }
-    _save_and_clear_tile_colors_cache();
+    bitmap_area__flush_cache();
     this->was_updated[x] = true;
 }
 
 bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED {
-    return _get_sand_color(this, x, y) > 0;
-}
-
-/******* PRIVATE CLASS *******/
-
-void __initialize_inner_tiles(sand_zone* this) {
-    uint8_t nb_tiles = this->width * this->height;
-    this->inner_tiles = tile_set__alloc(nb_tiles);
-
-    const uint8_t zero[] = {
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-    };
-
-    for (uint16_t z = 0; z < nb_tiles; z++) {
-        set_bkg_data(this->inner_tiles->start + z, 1, zero);
-    }
-
-
-    for (uint8_t x = 0; x < this->width; x++) {
-        for (uint8_t y = 0; y < this->height; y++) {
-            uint8_t tile_offset = y * this->width + x;
-            set_bkg_tile_xy(this->x + x, this->y + y, this->inner_tiles->start + tile_offset);
-        }
-    }
+    return bitmap_area__get_color(this->bitmap_area, x, y) > 0;
 }
 
 /******* PUBLIC CLASS *******/
@@ -297,7 +168,7 @@ sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) B
     tz->width = width;
     tz->height = height;
 
-    __initialize_inner_tiles(tz);
+    tz->bitmap_area = bitmap_area__new(x, y, width, height);
 
     tz->sand_chains = sand_chain__new_array(tz->width * 8);
 
@@ -308,6 +179,11 @@ sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) B
 }
 
 void sand_zone__delete(sand_zone* this) BANKED {
-    tile_set__free(this->inner_tiles);
+    bitmap_area__delete(this->bitmap_area);
+    for (uint8_t x = 0; x < this->width * 8; x++) {
+        sand_chain__delete(this->sand_chains + x);
+    }
+    free(this->needs_update);
+    free(this->was_updated);
     free(this);
 }
