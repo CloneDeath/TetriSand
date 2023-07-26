@@ -3,17 +3,21 @@
 #include "piece_master.h"
 #include <stdbool.h>
 #include <rand.h>
+
+#include "../res/TILES_Title.h"
+#include "../res/map-title.h"
+
 #include "tile_border.h"
 #include "tile_set.h"
-#include "../res/tile-title.h"
-#include "../res/map-title.h"
 #include "text_area.h"
 #include "global.h"
-#include "stdio.h"
 
 void show_title() {
+    uint8_t previous_bank = CURRENT_BANK;
+    SWITCH_ROM( BANK(TILES_Title) );
+
     tile_set* set = tile_set__alloc(47);
-    tile_set__set_data(set, TILE_Title);
+    tile_set__set_data(set, TILES_Title);
     set_bkg_based_tiles(0, 0, MAP_TitleWidth, MAP_TitleHeight, MAP_Title, set->start);
 
     while(true) {
@@ -24,6 +28,7 @@ void show_title() {
     }
 
     tile_set__free(set);
+    SWITCH_ROM( previous_bank );
 }
 
 void run_game() {

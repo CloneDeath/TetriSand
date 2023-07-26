@@ -23,48 +23,32 @@ const offset offsets[7][4] = {
     {{0,  1},  {0,  0}, {0, -1}, {-1, -1}}, // J
 };
 
-static inline int8_t
-_get_sub_piece_x(piece_master
-* this,
-uint8_t sn
-) {
-const offset *current = &(offsets[this->current_piece][sn]);
-switch (this->rotated % 4) {
-case 0: return current->x * 8;
-case 1: return -current->y * 8;
-case 2: return -current->x * 8;
-default:
-case 3: return current->y * 8;
-}
+static inline int8_t _get_sub_piece_x(piece_master* this, uint8_t sn) {
+    const offset *current = &(offsets[this->current_piece][sn]);
+    uint8_t rot = this->rotated % 4;
+    if (rot == 0) return current->x * 8;
+    if (rot == 1) return -current->y * 8;
+    if (rot == 2) return -current->x * 8;
+    return current->y * 8;
 }
 
-static inline uint8_t
-_get_sub_piece_y(piece_master
-* this,
-uint8_t sn
-) {
-const offset *current = &(offsets[this->current_piece][sn]);
-switch (this->rotated % 4) {
-case 0: return current->y * 8;
-case 1: return current->x * 8;
-case 2: return -current->y * 8;
-default:
-case 3: return -current->x * 8;
-}
+static inline uint8_t _get_sub_piece_y(piece_master* this, uint8_t sn) {
+    const offset *current = &(offsets[this->current_piece][sn]);
+    uint8_t rot = this->rotated % 4;
+    if (rot == 0) return current->y * 8;
+    if (rot == 1) return current->x * 8;
+    if (rot == 2) return -current->y * 8;
+    return -current->x * 8;
 }
 
 /******* PRIVATE INSTANCE *******/
 
-static inline uint8_t
-_get_center_x(piece_master
-* this) {
-return (this->zone->width * 8) / 2;
+static inline uint8_t _get_center_x(piece_master* this) {
+    return (this->zone->width * 8) / 2;
 }
 
-static inline uint8_t
-_get_top_y(piece_master
-* this) {
-return this->zone->height * 8;
+static inline uint8_t _get_top_y(piece_master* this) {
+    return this->zone->height * 8;
 }
 
 static inline void _set_color(piece_master *this, uint8_t color) {
@@ -81,51 +65,37 @@ static inline void _move_sprite_to(piece_master *this, uint8_t sn, uint8_t x, ui
 }
 
 
-static inline uint8_t
-_get_min_x(piece_master
-* this) {
-int8_t min_x = 0;
-for (
-uint8_t i = 0;
-i < 4; i++) {
-int8_t x = _get_sub_piece_x(this, i);
-if (x < min_x) {
-min_x = x;
-}
-}
-return -1 *
-min_x;
+static inline uint8_t _get_min_x(piece_master* this) {
+    int8_t min_x = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t x = _get_sub_piece_x(this, i);
+        if (x < min_x) {
+            min_x = x;
+        }
+    }
+    return -1 * min_x;
 }
 
-static inline uint8_t
-_get_min_y(piece_master
-* this) {
-int8_t min_y = 0;
-for (
-uint8_t i = 0;
-i < 4; i++) {
-int8_t y = _get_sub_piece_y(this, i);
-if (y < min_y) {
-min_y = y;
-}
-}
-return -1 *
-min_y;
+static inline uint8_t _get_min_y(piece_master* this) {
+    int8_t min_y = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t y = _get_sub_piece_y(this, i);
+        if (y < min_y) {
+            min_y = y;
+        }
+    }
+    return -1 * min_y;
 }
 
-static inline uint8_t
-_get_max_x(piece_master
-* this) {
-int8_t max_x = 0;
-for (
-uint8_t i = 0;
-i < 4; i++) {
-int8_t x = _get_sub_piece_x(this, i);
-if (x > max_x) {
-max_x = x;
-}
-}
-return (this->zone->width * 8) - (max_x + 8);
+static inline uint8_t _get_max_x(piece_master* this) {
+    int8_t max_x = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t x = _get_sub_piece_x(this, i);
+        if (x > max_x) {
+            max_x = x;
+        }
+    }
+    return (this->zone->width * 8) - (max_x + 8);
 }
 
 static inline void _adjust_sprites(piece_master *this) {
@@ -149,42 +119,24 @@ static inline void _spawn_sand(piece_master *this) {
     }
 }
 
-static inline bool
-_sub_piece_is_touching_sand(piece_master
-* this,
-uint8_t sb
-) {
-uint8_t piece_x = this->x + _get_sub_piece_x(this, sb);
-uint8_t piece_y = this->y + _get_sub_piece_y(this, sb);
-for (
-uint8_t x = piece_x;
-x < piece_x + 8; x++) {
-if (
-sand_zone__has_sand_at(this
-->zone, x, piece_y - 1)) {
-return
-true;
-}
-}
-return
-false;
+static inline bool _sub_piece_is_touching_sand(piece_master* this, uint8_t sb) {
+    uint8_t piece_x = this->x + _get_sub_piece_x(this, sb);
+    uint8_t piece_y = this->y + _get_sub_piece_y(this, sb);
+    for (uint8_t x = piece_x; x < piece_x + 8; x++) {
+        if (sand_zone__has_sand_at(this->zone, x, piece_y - 1)) {
+            return true;
+        }
+    }
+    return false;
 }
 
-static inline bool
-_piece_is_touching_sand(piece_master
-* this) {
-for (
-uint8_t i = 0;
-i < 4; i++) {
-if (
-_sub_piece_is_touching_sand(this, i
-)) {
-return
-true;
-}
-}
-return
-false;
+static inline bool _piece_is_touching_sand(piece_master* this) {
+    for (uint8_t i = 0; i < 4; i++) {
+        if (_sub_piece_is_touching_sand(this, i)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /******* PUBLIC INSTANCE *******/

@@ -1,6 +1,12 @@
+#pragma bank 3
+
+#include <gb/gb.h>
+
+BANKREF(TILES_Title)
+
 /*
 
- TILE-TITLE.C
+ TILES_Title.C
 
  Tile Source File.
 
@@ -23,7 +29,7 @@
 */
 
 /* Start of tile array. */
-const unsigned char TILE_Title[] =
+const unsigned char TILES_Title[] =
 {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -121,4 +127,4 @@ const unsigned char TILE_Title[] =
   0xA0,0xA0,0xA0,0xA0,0xA0,0xA0,0xC0,0xC0
 };
 
-/* End of TILE-TITLE.C */
+/* End of TILES_Title.C */

@@ -1,10 +1,12 @@
 #include "sand_zone.h"
 #include "allocate.h"
+#include "tile_set.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
+
 #include <gb/gb.h>
-#include "tile_set.h"
 
 static uint8_t tile_data[16];
 static uint8_t current_tile_index = 255; // Invalid tile index
@@ -84,7 +86,14 @@ static inline uint8_t _get_sand_color(sand_zone* this, uint8_t x, uint8_t y) {
     return _get_tile_color_bit(tile_index, pixel_x, pixel_y);
 }
 
+#include "stdio.h"
 static inline void _set_sand_color(sand_zone* this, uint8_t x, uint8_t y, uint8_t value) {
+    if (x > this->width * 8 || y > this->height * 8) {
+        HIDE_SPRITES;
+        printf("BOUNDS FAULT - %hu %hu", x, y);
+        exit(-1);
+    }
+
     uint8_t y_flipped = (this->height * 8 - 1) - y;
 
     uint8_t tile_x = x / 8;
@@ -93,6 +102,13 @@ static inline void _set_sand_color(sand_zone* this, uint8_t x, uint8_t y, uint8_
     uint8_t tile_index = this->inner_tiles->start + tile_offset;
     uint8_t pixel_x = x % 8;
     uint8_t pixel_y = y_flipped % 8;
+
+    if (tile_index < this->inner_tiles->start || tile_index > this->inner_tiles->start + this->inner_tiles->count) {
+        HIDE_SPRITES;
+        printf("INDEX FAULT - %hu %hu %hu", x, y, tile_index);
+        exit(-1);
+    }
+
     _set_tile_color_bit(tile_index, pixel_x, pixel_y, value);
 }
 

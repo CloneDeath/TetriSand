@@ -25,10 +25,12 @@
 #ifndef __tile_title_h_INCLUDE
 #define __tile_title_h_INCLUDE
 
+BANKREF_EXTERN(TILES_Title)
+
 /* Bank of tiles. */
-#define TILE_TitleBank 0
+#define TILES_TitleBank 3
 /* Start of tile array. */
-extern const unsigned char TILE_Title[];
+extern const unsigned char TILES_Title[];
 
 #endif
 
