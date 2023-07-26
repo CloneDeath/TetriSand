@@ -47,10 +47,10 @@ void run_game() {
         wait_vbl_done();
     }
 
-    sand_zone__delete(tz);
-    tile_border__delete(tb);
-    tile_border__delete(tb2);
-    piece_master__delete(pm);
+    // sand_zone__delete(tz);
+    // tile_border__delete(tb);
+    // tile_border__delete(tb2);
+    // piece_master__delete(pm);
 }
 
 int main(void) {

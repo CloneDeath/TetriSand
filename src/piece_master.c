@@ -111,7 +111,7 @@ static inline void _add_square(piece_master *this, uint8_t x, uint8_t y) {
 }
 
 static inline void _spawn_sand(piece_master *this) {
-    for (uint8_t i; i < 4; i++) {
+    for (uint8_t i = 0; i < 4; i++) {
         int8_t x = _get_sub_piece_x(this, i);
         int8_t y = _get_sub_piece_y(this, i);
 
