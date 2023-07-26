@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <rand.h>
 
-#include "../res/BANK3/TILES_Title.h"
-#include "../res/BANK3/MAP_Title.h"
+#include "../res/TITLE/TILES_Title.h"
+#include "../res/TITLE/MAP_Title.h"
 
 #include "tile_border.h"
 #include "tile_set.h"
@@ -18,6 +18,8 @@ void show_title() {
 
     tile_set* set = tile_set__alloc(47);
     tile_set__set_data(set, TILES_Title);
+
+    SWITCH_ROM( BANK(MAP_Title) );
     set_bkg_based_tiles(0, 0, MAP_TitleWidth, MAP_TitleHeight, MAP_Title, set->start);
 
     while(true) {

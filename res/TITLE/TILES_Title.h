@@ -25,10 +25,9 @@
 #ifndef __tile_title_h_INCLUDE
 #define __tile_title_h_INCLUDE
 
+#include <gb/gb.h>
 BANKREF_EXTERN(TILES_Title)
 
-/* Bank of tiles. */
-#define TILES_TitleBank 3
 /* Start of tile array. */
 extern const unsigned char TILES_Title[];
 

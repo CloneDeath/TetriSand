@@ -15,17 +15,20 @@ LCC = $(GBDK_HOME)bin/lcc
 # https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_toolchain_settings.html
 # -Wm-yc            GameBoy Color compatible
 # -Wm-yC            GameBoy Color only
-#
+LCCFLAGS	= -Wm-yc
+
 # https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_rombanking_mbcs.html#autotoc_md91
-# -Wm-yo<N> where <N> is the number of ROM banks. 2, 4, 8, 16, 32, 64, 128, 256, 512
-# -Wm-ya<N> where <N> is the number of RAM banks. 2, 4, 8, 16, 32
-# -Wm-yt<N> where <N> is the type of MBC cartridge (0x02: ROM+MBC1+RAM)
-#
+LCCFLAGS	+= -Wm-yoA		# -Wm-yo<N> where <N> is the number of ROM banks. 2, 4, 8, 16, 32, 64, 128, 256, 512
+LCCFLAGS	+= -Wm-ya1 		# -Wm-ya<N> where <N> is the number of RAM banks. 2, 4, 8, 16, 32
+LCCFLAGS	+= -Wm-yt0x02 	# -Wm-yt<N> where <N> is the type of MBC cartridge (0x02: ROM+MBC1+RAM)
+
+# https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_rombanking_mbcs.html#autotoc_md103
+LCCFLAGS	+= -autobank -Wb-ext=.rel
+
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
-LCCFLAGS 	= -Wm-yc -Wm-yt0x02 -Wm-yoA -Wm-ya1
-#LCCFLAGS 	= -Wm-yc -Wm-yt0x02 -Wm-yoA -Wm-ya1 -Wf--debug -Wl-y -Wl-w -Wl-m -O0
+#LCCFLAGS 	+= -Wf--debug -Wl-y -Wl-w -Wl-m -O0
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand

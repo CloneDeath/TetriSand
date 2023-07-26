@@ -20,6 +20,9 @@
 #ifndef __map_title_h_INCLUDE
 #define __map_title_h_INCLUDE
 
+#include <gb/gb.h>
+BANKREF_EXTERN(MAP_Title)
+
 #define MAP_TitleWidth 20
 #define MAP_TitleHeight 18
 #define MAP_TitleBank 0

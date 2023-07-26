@@ -18,6 +18,10 @@
 
 */
 
+#pragma bank 255
+#include <gb/gb.h>
+BANKREF(MAP_Title)
+
 #define MAP_TitleWidth 20
 #define MAP_TitleHeight 18
 #define MAP_TitleBank 0
