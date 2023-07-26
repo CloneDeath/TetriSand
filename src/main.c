@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <rand.h>
 
-#include "../res/TILES_Title.h"
-#include "../res/map-title.h"
+#include "../res/BANK3/TILES_Title.h"
+#include "../res/BANK3/MAP_Title.h"
 
 #include "tile_border.h"
 #include "tile_set.h"
