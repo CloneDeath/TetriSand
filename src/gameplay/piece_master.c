@@ -147,7 +147,10 @@ static inline bool _piece_is_touching_sand(piece_master* this) {
 /******* PUBLIC INSTANCE *******/
 
 void piece_master__update(piece_master *this) BANKED {
-    if (this->game_over) return;
+    if (this->game_over) {
+        _adjust_sprites(this);
+        return;
+    }
 
     if (this->needs_new_piece) {
         this->needs_new_piece = false;
