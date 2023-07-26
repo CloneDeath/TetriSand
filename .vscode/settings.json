@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "gb.h": "c",
-        "tile_zone.h": "c",
-        "allocate.h": "c"
-    }
-}

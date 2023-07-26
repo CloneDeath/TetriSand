@@ -98,6 +98,65 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
     }
 }
 
+static inline sand_chain* _get_matching_sand_chain(sand_zone* this, sand_chain* target, uint8_t x) {
+    if (target->length == 0 || target->value) return NULL;
+    uint8_t start = target->y;
+    uint8_t end = target->y + target->length - 1;
+    uint8_t value = target->value;
+
+    sand_chain* current = this->sand_chains[x].next;
+    while (current != NULL) {
+        if (current->y > end + 1) return NULL;
+        if (current->y + current->length < start - 1) {
+            current = current->next;
+            continue;
+        }
+        if (current->value != value) {
+            current = current->next;
+            continue;
+        }
+        return current;
+    }
+    return NULL;
+}
+
+static inline void _check_for_tetris(sand_zone* this) {
+    int8_t width = this->width * 8;
+    sand_chain** stack = allocate_array(width, sizeof(sand_chain*));
+    stack[0] = this->sand_chains[0].next;
+    int8_t stack_index = 0;
+
+    while (stack_index >= 0 && stack_index < width) {
+        sand_chain* current = stack[stack_index];
+        sand_chain* next = _get_matching_sand_chain(this, current, stack_index+1);
+        if (next == NULL) {
+            current = current->next;
+            stack[stack_index] = current;
+            if (current == NULL) {
+                stack_index--;
+            }
+            continue;
+        }
+
+        stack[stack_index+1] = next;
+        stack_index++;
+    }
+
+    if (stack_index < 0) {
+        free(stack);
+        return;
+    }
+
+    for (int8_t x = 0; x < width; x++) {
+        sand_chain* current = stack[x];
+        _set_sand_color_column(this, x, current->y, current->length, DMG_WHITE);
+        current->value = DMG_WHITE;
+        current->length = 0;
+    }
+
+    free(stack);
+}
+
 /******* PUBLIC INSTANCE *******/
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
@@ -140,6 +199,7 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         _slide_sand_chain(this, x - 1, x);
     }
 
+    _check_for_tetris(this);
     bitmap_area__flush_cache();
 }
 
