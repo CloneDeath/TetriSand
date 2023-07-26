@@ -2,9 +2,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "sand_chain.h"
-#include "tile_set.h"
-#include "engine/bitmap_area.h"
+#include "../sand_chain.h"
+#include "../tile_set.h"
+#include "../engine/bitmap_area.h"
 
 typedef struct sand_zone_struct {
     uint8_t x;

@@ -1,6 +1,6 @@
 #include <gb/gb.h>
-#include "sand_zone.h"
-#include "piece_master.h"
+#include "gameplay/sand_zone.h"
+#include "gameplay/piece_master.h"
 #include <stdbool.h>
 #include <rand.h>
 

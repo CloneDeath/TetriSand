@@ -22,9 +22,9 @@ typedef struct piece_master_struct {
 
 /******* INSTANCE *******/
 
-void piece_master__update(piece_master* this);
+void piece_master__update(piece_master* this) BANKED;
 
 /******* CLASS *******/
 
-piece_master* piece_master__new(sand_zone* zone);
-void piece_master__delete(piece_master* this);
+piece_master* piece_master__new(sand_zone* zone) BANKED;
+void piece_master__delete(piece_master* this) BANKED;

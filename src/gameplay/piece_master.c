@@ -1,9 +1,14 @@
+#pragma bank 255
+
 #include "piece_master.h"
-#include "allocate.h"
-#include <gb/gb.h>
+#include "../allocate.h"
+
+#include "../../res/tetromino.h"
+
 #include <stdlib.h>
 #include <rand.h>
-#include "../res/tetromino.h"
+
+#include <gb/gb.h>
 
 const uint8_t NUMBER_OF_PIECES = 7;
 
@@ -141,7 +146,7 @@ static inline bool _piece_is_touching_sand(piece_master* this) {
 
 /******* PUBLIC INSTANCE *******/
 
-void piece_master__update(piece_master *this) {
+void piece_master__update(piece_master *this) BANKED {
     if (this->needs_new_piece) {
         this->needs_new_piece = false;
         this->x = _get_center_x(this);
@@ -180,10 +185,10 @@ void piece_master__update(piece_master *this) {
 
 /******* CLASS *******/
 
-piece_master *piece_master__new(sand_zone *zone) {
+piece_master *piece_master__new(sand_zone *zone) BANKED {
     set_sprite_data(0, 4, Tetromino);
 
-    piece_master * this = allocate(sizeof(piece_master));
+    piece_master* this = allocate(sizeof(piece_master));
     this->x = 0;
     this->y = 0;
     this->current_piece = O;
@@ -192,6 +197,6 @@ piece_master *piece_master__new(sand_zone *zone) {
     return this;
 }
 
-void piece_master__delete(piece_master* this) {
+void piece_master__delete(piece_master* this) BANKED {
     free(this);
 }

@@ -1,8 +1,8 @@
 #pragma bank 255
 
 #include "sand_zone.h"
-#include "allocate.h"
-#include "tile_set.h"
+#include "../allocate.h"
+#include "../tile_set.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
