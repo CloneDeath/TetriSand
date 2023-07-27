@@ -1,6 +1,6 @@
 /*
 
- TILE-TITLE.H
+ TILES_TITLE.H
 
  Include File.
 
@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 46
+  Tiles                : 0 to 63
 
   Palette colors       : None.
   SGB Palette          : None.
@@ -22,15 +22,17 @@
 
 */
 
-#ifndef __tile_title_h_INCLUDE
-#define __tile_title_h_INCLUDE
+#ifndef __TILES_Title_h_INCLUDE
+#define __TILES_Title_h_INCLUDE
 
 #include <gb/gb.h>
 BANKREF_EXTERN(TILES_Title)
+
+#define TILES_TitleLen 64
 
 /* Start of tile array. */
 extern const unsigned char TILES_Title[];
 
 #endif
 
-/* End of TILE-TITLE.H */
+/* End of TILES_TITLE.H */

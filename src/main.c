@@ -20,7 +20,7 @@ void show_title() {
     uint8_t previous_bank = CURRENT_BANK;
     SWITCH_ROM( BANK(TILES_Title) );
 
-    tile_set* set = tile_set__alloc(47);
+    tile_set* set = tile_set__alloc(TILES_TitleLen);
     tile_set__set_data(set, TILES_Title);
 
     SWITCH_ROM( BANK(MAP_Title) );
