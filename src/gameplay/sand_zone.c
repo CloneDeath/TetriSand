@@ -103,23 +103,23 @@ static inline sand_chain* _get_matching_sand_chain(sand_zone* this, sand_chain* 
         printf("GOT BAD TARGET\n");
         return NULL;
     }
-    uint8_t start = target->y;
-    uint8_t end = target->y + target->length - 1;
     uint8_t value = target->value;
 
     sand_chain* current = this->sand_chains[x].next;
     while (current != NULL) {
-        if (current->y > end + 1) {
-            printf("BEYOND END\n");
-            return NULL;
-        }
-        if (current->y + current->length < start - 1) {
-            printf("TOO LOW\n");
+        if (current->value != value) {
+            printf("WRONG VALUE\n");
             current = current->next;
             continue;
         }
-        if (current->value != value) {
-            printf("WRONG VALUE\n");
+
+        int8_t adjacency = sand_chain__get_adjacency(target, current);
+        if (adjacency > 0) {
+            printf("BEYOND END\n");
+            return NULL;
+        }
+        if (adjacency < 0) {
+            printf("TOO LOW\n");
             current = current->next;
             continue;
         }
@@ -130,24 +130,38 @@ static inline sand_chain* _get_matching_sand_chain(sand_zone* this, sand_chain* 
     return NULL;
 }
 
-static inline void _check_for_tetris(sand_zone* this) {
+static inline bool _chain_has_tetris(sand_zone* this, sand_chain** stack) {
     int8_t width = this->width * 8;
-    if (this->sand_chains[0].next == NULL) return;
-
-    sand_chain** stack = allocate_array(width, sizeof(sand_chain*));
-    stack[0] = this->sand_chains[0].next;
+    uint8_t value = stack[0]->value;
     int8_t stack_index = 0;
 
     while (stack_index >= 0 && stack_index < width) {
-        printf("\n");
-        printf("SI = 0x%x\n", stack_index);
         sand_chain* current = stack[stack_index];
-        printf("CURRENT = 0x%x\n", current);
         sand_chain* next = _get_matching_sand_chain(this, current, stack_index+1);
-        printf("NEXT = 0x%x\n", next);
 
         if (next == NULL) {
+            if (stack_index == 0) return false;
+            sand_chain* prev = stack[stack_index-1];
             current = current->next;
+            while (current != NULL) {
+                if (current->value != value) {
+                    current = current->next;
+                    continue;
+                }
+
+                int8_t adjacency = sand_chain__get_adjacency(prev, current);
+                if (adjacency < 0) {
+                    current = current->next;
+                    continue;
+                }
+
+                if (adjacency > 0) {
+                    current = NULL;
+                    break;
+                }
+
+                break;
+            }
             stack[stack_index] = current;
             if (current == NULL) {
                 stack_index--;
@@ -158,7 +172,25 @@ static inline void _check_for_tetris(sand_zone* this) {
         stack[++stack_index] = next;
     }
 
-    if (stack_index < 0) {
+    return stack_index >= width;
+}
+
+static inline void _check_for_tetris(sand_zone* this) {
+    int8_t width = this->width * 8;
+    sand_chain* start = this->sand_chains[0].next;
+    if (start == NULL) return;
+
+    sand_chain** stack = allocate_array(width, sizeof(sand_chain*));
+
+    while (start != NULL) {
+        stack[0] = start;
+        if (_chain_has_tetris(this, stack)) {
+            break;
+        }
+        start = start->next;
+    }
+
+    if (start == NULL) {
         free(stack);
         return;
     }
