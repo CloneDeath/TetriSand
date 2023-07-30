@@ -8,7 +8,7 @@
             "type": "emulicious-debugger",
             "request": "launch",
             "name": "Launch in Emulicious",
-            "program": "${workspaceFolder}/obj/TetriSand.gb",
+            "program": "${workspaceFolder}/obj/test.gb",
             "port": 58870,
             "stopOnEntry": true
         }

@@ -28,7 +28,7 @@ LCCFLAGS += -autobank -Wb-ext=.rel
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
-#LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m -O0
+# LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m -O0
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
