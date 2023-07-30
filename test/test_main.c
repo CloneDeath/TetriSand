@@ -10,6 +10,9 @@ const struct test test_list[] = {
 
     /* sand_chain_list */
     { "sand_chain_list__contains", test__sand_chain_list__contains },
+    { "sand_chain_list__contains_x", test__sand_chain_list__contains_x },
+    { "sand_chain_list__has_any", test__sand_chain_list__has_any },
+    { "sand_chain_list__push_front", test__sand_chain_list__push_front },
     { NULL, NULL }
 };
 
