@@ -1,6 +1,7 @@
 #pragma bank 255
 
 #include "sand_zone.h"
+#include "sand_chain_list.h"
 #include "../allocate.h"
 #include "../tile_set.h"
 
@@ -98,118 +99,101 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
     }
 }
 
-static inline sand_chain* _get_matching_sand_chain(sand_zone* this, sand_chain* target, uint8_t x) {
-    if (target->length == 0 || target->value == 0) {
-        printf("GOT BAD TARGET\n");
-        return NULL;
-    }
-    uint8_t value = target->value;
+static inline sand_chain_list* __get_same_color_adjacent_chains_in_column(sand_zone* this, sand_chain* chain, uint8_t x) {
+    uint8_t color = chain->value;
+    sand_chain_list* chains = sand_chain_list__new();
 
     sand_chain* current = this->sand_chains[x].next;
     while (current != NULL) {
-        if (current->value != value) {
-            printf("WRONG VALUE\n");
+        if (current->value != color) {
             current = current->next;
             continue;
         }
 
-        int8_t adjacency = sand_chain__get_adjacency(target, current);
-        if (adjacency > 0) {
-            printf("BEYOND END\n");
-            return NULL;
-        }
+        int8_t adjacency = sand_chain__get_adjacency(chain, current);
+        if (adjacency > 0) break;
         if (adjacency < 0) {
-            printf("TOO LOW\n");
             current = current->next;
             continue;
         }
-        printf("FOUND = 0x%x\n", current);
-        return current;
+
+        sand_chain_list__push_front(chains, current, x);
     }
-    printf("GOT NULL\n");
-    return NULL;
+
+    return chains;
 }
 
-static inline bool _chain_has_tetris(sand_zone* this, sand_chain** stack) {
-    int8_t width = this->width * 8;
-    uint8_t value = stack[0]->value;
-    int8_t stack_index = 0;
+static inline sand_chain_list* __get_same_color_chains_adjacent_to(sand_zone* this, sand_chain* chain, uint8_t x) {
+    sand_chain_list* chains = sand_chain_list__new();
+    if (x > 0) {
+        sand_chain_list* left = __get_same_color_adjacent_chains_in_column(this, chain, x - 1);
+        chains = sand_chain_list__combine(chains, left);
+    }
 
-    while (stack_index >= 0 && stack_index < width) {
-        sand_chain* current = stack[stack_index];
-        sand_chain* next = _get_matching_sand_chain(this, current, stack_index+1);
+    if (x < this->width * 8 - 1) {
+        sand_chain_list* right = __get_same_color_adjacent_chains_in_column(this, chain, x - 1);
+        chains = sand_chain_list__combine(chains, right);
+    }
 
-        if (next == NULL) {
-            if (stack_index == 0) return false;
-            sand_chain* prev = stack[stack_index-1];
-            current = current->next;
-            while (current != NULL) {
-                if (current->value != value) {
-                    current = current->next;
-                    continue;
-                }
+    return chains;
+}
 
-                int8_t adjacency = sand_chain__get_adjacency(prev, current);
-                if (adjacency < 0) {
-                    current = current->next;
-                    continue;
-                }
+static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_chain* current) {
+    uint8_t width = this->width * 8;
+    sand_chain_list* stacks = sand_chain_list__new_array(width);
+    sand_chain_list__push_front(stacks + 0, current, 0);
 
-                if (adjacency > 0) {
-                    current = NULL;
-                    break;
-                }
+    sand_chain_list* processed = sand_chain_list__new();
+    sand_chain_list* to_process = sand_chain_list__new();
 
-                break;
-            }
-            stack[stack_index] = current;
-            if (current == NULL) {
-                stack_index--;
-            }
+    sand_chain_list__push_front(to_process, current, 0);
+
+    while (sand_chain_list__has_any(to_process)) {
+        sand_chain_reference* current = sand_chain_list__pop_front(to_process);
+
+        if (sand_chain_list__contains(processed, current->chain)) {
+            sand_chain_reference__delete_single(current);
             continue;
         }
+        sand_chain_list__push_front_reference(processed, current);
 
-        stack[++stack_index] = next;
+        sand_chain_list* adjacent = __get_same_color_chains_adjacent_to(this, current->chain, current->x);
+        to_process = sand_chain_list__combine(to_process, adjacent);
     }
 
-    return stack_index >= width;
+    if (sand_chain_list__contains_x(processed, this->width * 8 - 1)) {
+        sand_chain_reference* current = processed->_items;
+        while (current != NULL) {
+            current->chain->value = 0;
+            current->chain->length = 0;
+            current = current->next;
+        }
+        sand_chain_list__delete_array(stacks, width);
+        return true;
+    }
+
+    sand_chain_list__delete_array(stacks, width);
+    return false;
 }
 
-static inline void _check_for_tetris(sand_zone* this) {
-    int8_t width = this->width * 8;
-    sand_chain* start = this->sand_chains[0].next;
-    if (start == NULL) return;
+static inline void _check_for_start_to_end_path(sand_zone* this) {
+    sand_chain* current = this->sand_chains[0].next;
 
-    sand_chain** stack = allocate_array(width, sizeof(sand_chain*));
-
-    while (start != NULL) {
-        stack[0] = start;
-        if (_chain_has_tetris(this, stack)) {
-            break;
+    while (current != NULL) {
+        if (_check_for_start_to_end_path_for_chain(this, current)) {
+            _collapse_empty_and_similar_chains(this);
+            return;
         }
-        start = start->next;
-    }
 
-    if (start == NULL) {
-        free(stack);
-        return;
+        current = current->next;
     }
-
-    for (int8_t x = 0; x < width; x++) {
-        sand_chain* current = stack[x];
-        _set_sand_color_column(this, x, current->y, current->length, DMG_WHITE);
-        current->value = DMG_WHITE;
-        current->length = 0;
-    }
-
-    free(stack);
 }
 
 /******* PUBLIC INSTANCE *******/
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
-    _check_for_tetris(this);
+    _check_for_start_to_end_path(this);
 
     uint8_t width = this->width * 8;
 
