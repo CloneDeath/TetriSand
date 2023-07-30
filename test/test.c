@@ -36,7 +36,7 @@ void run_tests(struct test* tests) {
         _run_test(tests[i]);
     }
 
-    printf("Summary:\n");
+    printf("\nSummary:\n");
     uint8_t total = passed + failed;
     printf(" %u/%u tests passed\n", passed, total);
 

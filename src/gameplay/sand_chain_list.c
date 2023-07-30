@@ -4,10 +4,13 @@
 
 /******* INSTANCE *******/
 
+#include "stdio.h"
+
 bool sand_chain_list__contains(sand_chain_list* this, sand_chain* item) {
     sand_chain_reference* current = this->_items;
     while (current != NULL) {
         if (current->chain == item) return true;
+        current = current->next;
     }
     return false;
 }
@@ -16,6 +19,7 @@ bool sand_chain_list__contains_x(sand_chain_list* this, uint8_t x) {
     sand_chain_reference* current = this->_items;
     while (current != NULL) {
         if (current->x == x) return true;
+        current = current->next;
     }
     return false;
 }
