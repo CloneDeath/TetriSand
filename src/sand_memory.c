@@ -1,5 +1,5 @@
 #include "sand_memory.h"
-#include "sand_chain.h"
+#include "gameplay/sand_chain.h"
 
 #include <stdint.h>
 #include <assert.h>

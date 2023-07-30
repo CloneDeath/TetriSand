@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "../sand_chain.h"
+#include "sand_chain.h"
 #include "../tile_set.h"
 #include "../engine/bitmap_area.h"
 

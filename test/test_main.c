@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <gb/gb.h>
 #include "test.h"
-#include "../src/sand_chain.h"
+#include "../src/gameplay/sand_chain.h"
 
 void excise_chain_works(void) {
     sand_chain* chain = sand_chain__new(0, 10, 3);
