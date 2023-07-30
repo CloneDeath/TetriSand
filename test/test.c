@@ -19,14 +19,14 @@ void ASSERT(bool is_true) {
 void _run_test(struct test this) {
     assert_number = -1;
     assertion_failed = false;
-    printf("%s", this.name);
+    printf("%s ", this.name);
     this.func();
     if (assertion_failed) {
-        printf(" FAILED\n");
+        printf("FAILED\n");
         printf("ASSERT #%hd\n", assert_number);
         failed++;
     } else {
-        printf(" PASSED\n");
+        printf("PASSED\n");
         passed++;
     }
 }

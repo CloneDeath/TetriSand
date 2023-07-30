@@ -83,7 +83,9 @@ sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t len
     // find first chain to excise from
     sand_chain* first_chain = this;
     while (first_chain != NULL) {
-        if (first_chain->y <= from && first_chain->y + first_chain->length > from) break;
+        if (first_chain->y <= from && first_chain->y + first_chain->length > from) {
+            break;
+        }
         first_chain = first_chain->next;
     }
 
@@ -138,14 +140,7 @@ int8_t sand_chain__get_adjacency(sand_chain* this, sand_chain* other) {
 }
 
 /******* CLASS *******/
-
-uint16_t total_chains = 0;
-
 sand_chain* sand_chain__new(uint8_t y, uint8_t length, uint8_t value) {
-    total_chains++;
-    text_area__reset(global__text);
-    text_area__print_number(global__text, total_chains);
-
     sand_chain* chain = sand_memory__alloc();
     chain->y = y;
     chain->length = length;
@@ -155,19 +150,11 @@ sand_chain* sand_chain__new(uint8_t y, uint8_t length, uint8_t value) {
 }
 
 sand_chain* sand_chain__new_array(size_t count) {
-    total_chains+=count;
-    text_area__reset(global__text);
-    text_area__print_number(global__text, total_chains);
-
     sand_chain* chain = sand_memory__calloc(count);
     return chain;
 }
 
 sand_chain* sand_chain__copy(sand_chain* original) {
-    total_chains++;
-    text_area__reset(global__text);
-    text_area__print_number(global__text, total_chains);
-
     sand_chain* chain = sand_memory__alloc();
     chain->y = original->y;
     chain->length = original->length;
@@ -179,12 +166,8 @@ sand_chain* sand_chain__copy(sand_chain* original) {
 void sand_chain__delete(sand_chain* this) {
     sand_chain* current = this;
     while (current != NULL) {
-        total_chains--;
         sand_chain* next = current->next;
         sand_memory__free(current);
         current = next;
     }
-
-    text_area__reset(global__text);
-    text_area__print_number(global__text, total_chains);
 }

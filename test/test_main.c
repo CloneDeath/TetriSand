@@ -14,6 +14,8 @@ const struct test test_list[] = {
 };
 
 int main() {
+    ENABLE_RAM_MBC1;
+
     SHOW_BKG;
     run_tests((struct test*)test_list);
     wait_vbl_done();

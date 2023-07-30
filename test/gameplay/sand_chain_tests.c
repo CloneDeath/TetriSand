@@ -4,6 +4,8 @@
 
 #include "../../src/gameplay/sand_chain.h"
 
+#include "stdio.h"
+
 void test_sand_chain__excise_chain() {
     sand_chain* chain = sand_chain__new(0, 10, 3);
 
