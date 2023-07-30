@@ -99,39 +99,15 @@ static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
     }
 }
 
-static inline sand_chain_list* __get_same_color_adjacent_chains_in_column(sand_zone* this, sand_chain* chain, uint8_t x) {
-    uint8_t color = chain->value;
-    sand_chain_list* chains = sand_chain_list__new();
-
-    sand_chain* current = this->sand_chains[x].next;
-    while (current != NULL) {
-        if (current->value != color) {
-            current = current->next;
-            continue;
-        }
-
-        int8_t adjacency = sand_chain__get_adjacency(chain, current);
-        if (adjacency > 0) break;
-        if (adjacency < 0) {
-            current = current->next;
-            continue;
-        }
-
-        sand_chain_list__push_front(chains, current, x);
-    }
-
-    return chains;
-}
-
 static inline sand_chain_list* __get_same_color_chains_adjacent_to(sand_zone* this, sand_chain* chain, uint8_t x) {
     sand_chain_list* chains = sand_chain_list__new();
     if (x > 0) {
-        sand_chain_list* left = __get_same_color_adjacent_chains_in_column(this, chain, x - 1);
+        sand_chain_list* left = sand_zone__get_connected_chains_in_column(this, chain, x - 1);
         chains = sand_chain_list__combine(chains, left);
     }
 
     if (x < this->width * 8 - 1) {
-        sand_chain_list* right = __get_same_color_adjacent_chains_in_column(this, chain, x - 1);
+        sand_chain_list* right = sand_zone__get_connected_chains_in_column(this, chain, x + 1);
         chains = sand_chain_list__combine(chains, right);
     }
 
@@ -190,6 +166,30 @@ static inline void _check_for_start_to_end_path(sand_zone* this) {
 }
 
 /******* PUBLIC INSTANCE *******/
+
+sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand_chain* chain, uint8_t x) BANKED {
+    uint8_t color = chain->value;
+    sand_chain_list* chains = sand_chain_list__new();
+
+    sand_chain* current = this->sand_chains[x].next;
+    while (current != NULL) {
+        if (current->value != color) {
+            current = current->next;
+            continue;
+        }
+
+        int8_t adjacency = sand_chain__get_adjacency(chain, current);
+        if (adjacency > 0) break;
+        if (adjacency < 0) {
+            current = current->next;
+            continue;
+        }
+
+        sand_chain_list__push_front(chains, current, x);
+    }
+
+    return chains;
+}
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);

@@ -1,6 +1,7 @@
 #include "test.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <gb/gb.h>
 
 int8_t assert_number = -1;
 bool assertion_failed;
@@ -20,6 +21,7 @@ void _run_test(struct test this) {
     assert_number = -1;
     assertion_failed = false;
     printf("%s ", this.name);
+    SWITCH_ROM_MBC1(this.bank);
     this.func();
     if (assertion_failed) {
         printf("FAILED\n");
