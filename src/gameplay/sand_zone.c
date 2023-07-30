@@ -144,11 +144,15 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
             current->chain->length = 0;
             current = current->next;
         }
+        sand_chain_list__delete(processed);
+        sand_chain_list__delete(to_process);
         sand_chain_list__delete_array(stacks, width);
         return true;
     }
 
-    sand_chain_list__delete_array(stacks, width);
+    sand_chain_list__delete(processed);
+    sand_chain_list__delete(to_process);
+    sand_chain_list__delete_array(stacks, width);;
     return false;
 }
 
@@ -186,6 +190,7 @@ sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand
         }
 
         sand_chain_list__push_front(chains, current, x);
+        current = current->next;
     }
 
     return chains;
