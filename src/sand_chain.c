@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 
 /******* PRIVATE INSTANCE *******/
 
@@ -118,6 +119,22 @@ void sand_chain__try_to_combine(sand_chain *this) {
     this->next = next->next;
     next->next = NULL;
     sand_chain__delete(next);
+}
+
+int8_t sand_chain__get_adjacency(sand_chain* this, sand_chain* other) {
+    assert(this->length > 0);
+    assert(other->length > 0);
+
+    uint8_t start = this->y;
+    uint8_t end = start + this->length - 1;
+
+    if (other->y > end + 1) {
+        return 1;
+    }
+    if (other->y + other->length < start - 1) {
+        return -1;
+    }
+    return 0;
 }
 
 /******* CLASS *******/
