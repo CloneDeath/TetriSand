@@ -124,8 +124,12 @@ void sand_chain__try_to_combine(sand_chain *this) {
 }
 
 int8_t sand_chain__get_adjacency(sand_chain* this, sand_chain* other) {
-    assert(this->length > 0);
-    assert(other->length > 0);
+    if (this->length == 0) {
+        return -1;
+    }
+    if (other->length == 0) {
+        return -1;
+    }
 
     uint8_t start = this->y;
     uint8_t end = start + this->length - 1;
