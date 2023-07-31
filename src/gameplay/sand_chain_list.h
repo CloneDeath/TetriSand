@@ -6,7 +6,8 @@
 
 typedef struct sand_chain_list_struct {
     // private:
-    sand_chain_reference* _items;
+    sand_chain_reference* _first;
+    sand_chain_reference* _last;
 } sand_chain_list;
 
 /******* INSTANCE *******/
