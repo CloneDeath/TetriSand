@@ -19,12 +19,12 @@ void test__sand_zone__get_connected_chains_in_column() BANKED {
 
         sand_chain_list* list = sand_zone__get_connected_chains_in_column(zone, current, 1);
 
-        ASSERT(list->_items->chain->y == 0);
-        ASSERT(list->_items->chain->length == 2);
-        ASSERT(list->_items->chain->value == 1);
-        ASSERT(list->_items->chain->next == NULL);
-        ASSERT(list->_items->x == 1);
-        ASSERT(list->_items->next == NULL);
+        ASSERT(list->_first->chain->y == 0);
+        ASSERT(list->_first->chain->length == 2);
+        ASSERT(list->_first->chain->value == 1);
+        ASSERT(list->_first->chain->next == NULL);
+        ASSERT(list->_first->x == 1);
+        ASSERT(list->_first->next == NULL);
 
         sand_chain_list__delete(list);
         sand_zone__delete(zone);

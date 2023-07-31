@@ -96,8 +96,8 @@ void test__sand_chain_list__push_front() {
 
         sand_chain_list__push_front(list, a, 1);
 
-        ASSERT(list->_items->chain == a);
-        ASSERT(list->_items->x == 1);
+        ASSERT(list->_first->chain == a);
+        ASSERT(list->_first->x == 1);
 
         sand_chain__delete(a);
         sand_chain_list__delete(list);
@@ -112,11 +112,11 @@ void test__sand_chain_list__push_front() {
         sand_chain_list__push_front(list, b, 2);
 
         // b
-        ASSERT(list->_items->chain == b);
-        ASSERT(list->_items->x == 2);
+        ASSERT(list->_first->chain == b);
+        ASSERT(list->_first->x == 2);
         // a
-        ASSERT(list->_items->next->chain == a);
-        ASSERT(list->_items->next->x == 1);
+        ASSERT(list->_first->next->chain == a);
+        ASSERT(list->_first->next->x == 1);
 
         sand_chain__delete(a);
         sand_chain__delete(b);
@@ -133,9 +133,9 @@ void test__sand_chain_list__push_front_reference() {
 
         sand_chain_list__push_front_reference(list, ref);
 
-        ASSERT(list->_items->chain == x);
-        ASSERT(list->_items->x == 2);
-        ASSERT(list->_items->next == NULL);
+        ASSERT(list->_first->chain == x);
+        ASSERT(list->_first->x == 2);
+        ASSERT(list->_first->next == NULL);
 
         sand_chain__delete(x);
         sand_chain_list__delete(list);
@@ -151,11 +151,11 @@ void test__sand_chain_list__push_front_reference() {
         sand_chain_list__push_front_reference(list, ref);
 
         // b
-        ASSERT(list->_items->chain == b);
-        ASSERT(list->_items->x == 2);
+        ASSERT(list->_first->chain == b);
+        ASSERT(list->_first->x == 2);
         // a
-        ASSERT(list->_items->next->chain == a);
-        ASSERT(list->_items->next->x == 1);
+        ASSERT(list->_first->next->chain == a);
+        ASSERT(list->_first->next->x == 1);
 
         sand_chain__delete(a);
         sand_chain__delete(b);
@@ -172,7 +172,7 @@ void test__sand_chain_list__pop_front() {
 
         sand_chain_reference* ref = sand_chain_list__pop_front(list);
 
-        ASSERT(list->_items == NULL);
+        ASSERT(list->_first == NULL);
         ASSERT(ref->chain == x);
         ASSERT(ref->x == 11);
         ASSERT(ref->next == NULL);
@@ -191,9 +191,9 @@ void test__sand_chain_list__pop_front() {
 
         sand_chain_reference* ref = sand_chain_list__pop_front(list);
 
-        ASSERT(list->_items->chain == front);
-        ASSERT(list->_items->x == 1);
-        ASSERT(list->_items->next == NULL);
+        ASSERT(list->_first->chain == front);
+        ASSERT(list->_first->x == 1);
+        ASSERT(list->_first->next == NULL);
         ASSERT(ref->chain == x);
         ASSERT(ref->x == 12);
         ASSERT(ref->next == NULL);
@@ -249,7 +249,7 @@ void test__sand_chain_list__combine() {
 
         sand_chain_list* combined = sand_chain_list__combine(left, right);
 
-        ASSERT(combined->_items == NULL);
+        ASSERT(combined->_first == NULL);
 
         sand_chain_list__delete(combined);
     }
@@ -263,9 +263,9 @@ void test__sand_chain_list__combine() {
         sand_chain_list* combined = sand_chain_list__combine(left, right);
 
         ASSERT(combined == right);
-        ASSERT(combined->_items->chain == a);
-        ASSERT(combined->_items->x == 0);
-        ASSERT(combined->_items->next == NULL);
+        ASSERT(combined->_first->chain == a);
+        ASSERT(combined->_first->x == 0);
+        ASSERT(combined->_first->next == NULL);
 
         sand_chain__delete(a);
         sand_chain_list__delete(combined);
@@ -280,9 +280,9 @@ void test__sand_chain_list__combine() {
         sand_chain_list* combined = sand_chain_list__combine(left, right);
 
         ASSERT(combined == left);
-        ASSERT(combined->_items->chain == a);
-        ASSERT(combined->_items->x == 0);
-        ASSERT(combined->_items->next == NULL);
+        ASSERT(combined->_first->chain == a);
+        ASSERT(combined->_first->x == 0);
+        ASSERT(combined->_first->next == NULL);
 
         sand_chain__delete(a);
         sand_chain_list__delete(combined);
@@ -298,11 +298,11 @@ void test__sand_chain_list__combine() {
 
         sand_chain_list* combined = sand_chain_list__combine(left, right);
 
-        ASSERT(combined->_items->chain == a);
-        ASSERT(combined->_items->x == 0);
-        ASSERT(combined->_items->next->chain == b);
-        ASSERT(combined->_items->next->x == 1);
-        ASSERT(combined->_items->next->next == NULL);
+        ASSERT(combined->_first->chain == a);
+        ASSERT(combined->_first->x == 0);
+        ASSERT(combined->_first->next->chain == b);
+        ASSERT(combined->_first->next->x == 1);
+        ASSERT(combined->_first->next->next == NULL);
 
         sand_chain__delete(a);
         sand_chain__delete(b);

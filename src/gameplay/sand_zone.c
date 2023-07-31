@@ -138,7 +138,7 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
     }
 
     if (sand_chain_list__contains_x(processed, this->width * 8 - 1)) {
-        sand_chain_reference* current = processed->_items;
+        sand_chain_reference* current = processed->_first;
         while (current != NULL) {
             _set_sand_color_column(this, current->x, current->chain->y, current->chain->length, DMG_WHITE);
             current->chain->value = 0;
