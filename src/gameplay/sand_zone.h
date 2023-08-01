@@ -18,6 +18,7 @@ typedef struct sand_zone_struct {
 
     bool* needs_update;
     bool* was_updated;
+    bool start_to_end_triggered;
 } sand_zone;
 
 /******* INSTANCE *******/

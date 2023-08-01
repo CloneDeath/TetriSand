@@ -13,6 +13,9 @@
 #include <gb/gb.h>
 
 static inline void _move_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
+    this->was_updated[x] = true;
+    this->start_to_end_triggered = false;
+
     chain->y -= 1;
     bitmap_area__set_color(this->bitmap_area, x, chain->y, chain->value);
     bitmap_area__set_color(this->bitmap_area, x, chain->y + chain->length, DMG_WHITE);
@@ -73,6 +76,7 @@ static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) 
 
         this->was_updated[x] = true;
         this->was_updated[new_x] = true;
+        this->start_to_end_triggered = false;
     }
 }
 
@@ -158,6 +162,7 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
 }
 
 static inline void _check_for_start_to_end_path(sand_zone* this) {
+    this->start_to_end_triggered = true;
     sand_chain* current = this->sand_chains[0].next;
 
     while (current != NULL) {
@@ -168,6 +173,15 @@ static inline void _check_for_start_to_end_path(sand_zone* this) {
 
         current = current->next;
     }
+}
+
+static inline bool _should_check_for_start_to_end_path(sand_zone* this) {
+    if (this->start_to_end_triggered) return false;
+    uint8_t width = this->width * 8;
+    for (uint8_t i = 0; i < width; i++) {
+        if (this->was_updated[i]) return false;
+    }
+    return true;
 }
 
 /******* PUBLIC INSTANCE *******/
@@ -199,7 +213,10 @@ sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
-    _check_for_start_to_end_path(this);
+
+    if (_should_check_for_start_to_end_path(this)) {
+        _check_for_start_to_end_path(this);
+    }
 
     uint8_t width = this->width * 8;
 
@@ -213,7 +230,6 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         sand_chain *chain = &this->sand_chains[x];
         if (chain->y > 0) {
             _move_chain_down(this, x, chain);
-            this->was_updated[x] = true;
         }
 
         sand_chain *prev_chain = chain;
@@ -221,7 +237,6 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         while (chain) {
             if (chain->y > prev_chain->y + prev_chain->length) {
                 _move_chain_down(this, x, chain);
-                this->was_updated[x] = true;
             }
             prev_chain = chain;
             chain = chain->next;
@@ -272,6 +287,8 @@ sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) B
 
     tz->needs_update = allocate_array(tz->width * 8, sizeof(bool));
     tz->was_updated = allocate_array(tz->width * 8, sizeof(bool));
+
+    tz->start_to_end_triggered = true;
 
     return tz;
 }

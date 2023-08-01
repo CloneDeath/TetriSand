@@ -17,6 +17,8 @@ LCC = $(GBDK_HOME)bin/lcc
 # -Wm-yC            GameBoy Color only
 LCCFLAGS = -Wm-yc
 
+LCCFLAGS += -Wm-yn"TetriSand" # -yn name cartridge name
+
 # https://gbdk-2020.github.io/gbdk-2020/docs/api/docs_rombanking_mbcs.html#autotoc_md91
 LCCFLAGS += -Wm-yoA # -Wm-yo<N> where <N> is the number of ROM banks. 2, 4, 8, 16, 32, 64, 128, 256, 512
 LCCFLAGS += -Wm-ya1 # -Wm-ya<N> where <N> is the number of RAM banks. 2, 4, 8, 16, 32
