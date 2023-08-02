@@ -228,10 +228,6 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         this->was_updated[x] = false;
 
         sand_chain *chain = &this->sand_chains[x];
-        if (chain->y > 0) {
-            _move_chain_down(this, x, chain);
-        }
-
         sand_chain *prev_chain = chain;
         chain = chain->next;
         while (chain) {
