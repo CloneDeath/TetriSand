@@ -157,7 +157,7 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
 
     sand_chain_list__delete(processed);
     sand_chain_list__delete(to_process);
-    sand_chain_list__delete_array(stacks, width);;
+    sand_chain_list__delete_array(stacks, width);
     return false;
 }
 
