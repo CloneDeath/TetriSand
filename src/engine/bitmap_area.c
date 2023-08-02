@@ -56,8 +56,12 @@ static inline uint8_t _get_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t
     return value;
 }
 
+static const uint8_t masks[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
+
 static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y, uint8_t value) {
     _load_tile_colors_into_cache(tile_index);
+
+    uint8_t shift = 7 - x;
 
     uint8_t rowL = tile_data[y * 2 + 0];
     uint8_t rowH = tile_data[y * 2 + 1];
@@ -65,13 +69,13 @@ static inline void _set_tile_color_bit(uint8_t tile_index, uint8_t x, uint8_t y,
     // Limit value to two bits (0-3)
     value &= 3;
 
-    // Clear the bits
-    rowL &= ~(1 << (7 - x));
-    rowH &= ~(1 << (7 - x));
+    // Clear the bits using precomputed masks
+    rowL &= masks[x];
+    rowH &= masks[x];
 
     // Set the new bits
-    rowL |= (value & 1) << (7 - x);
-    rowH |= (value >> 1) << (7 - x);
+    rowL |= (value & 1) << shift;
+    rowH |= (value >> 1) << shift;
 
     // Store the modified bytes back into the tile data
     tile_data[y * 2 + 0] = rowL;
