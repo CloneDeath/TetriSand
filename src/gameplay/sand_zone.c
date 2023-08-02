@@ -266,6 +266,10 @@ void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, 
 
 bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED {
     return bitmap_area__get_color(this->bitmap_area, x, y) > 0;
+    /*sand_chain* chain = &this->sand_chains[x];
+    sand_chain* top = sand_chain__get_last_connected(chain);
+    uint8_t height = top->y + top->length;
+    return y < height;*/
 }
 
 /******* PUBLIC CLASS *******/
