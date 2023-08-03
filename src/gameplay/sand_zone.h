@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "../tile_set.h"
+#include "../engine/tile_set.h"
 #include "../engine/bitmap_area.h"
 
 typedef struct sand_zone_struct {

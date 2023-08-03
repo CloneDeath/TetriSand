@@ -1,7 +1,7 @@
 #pragma bank 255
 
 #include "bitmap_area.h"
-#include "../allocate.h"
+#include "allocate.h"
 
 #include "../../res/TILES_blank.h"
 

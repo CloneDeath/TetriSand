@@ -1,7 +1,7 @@
-#include "allocate.h"
+#include "../engine/allocate.h"
 #include "tile_border.h"
-#include "tile_set.h"
-#include "../res/tile-border.h"
+#include "../engine/tile_set.h"
+#include "../../res/tile-border.h"
 #include <stdlib.h>
 #include <gb/gb.h>
 

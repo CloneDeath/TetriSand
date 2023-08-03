@@ -1,7 +1,7 @@
 #pragma bank 255
 
 #include "piece_master.h"
-#include "../allocate.h"
+#include "../engine/allocate.h"
 
 #include "../../res/tetromino.h"
 

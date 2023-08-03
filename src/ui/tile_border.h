@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "tile_set.h"
+#include "../engine/tile_set.h"
 
 typedef struct tile_border_struct {
     uint8_t x;

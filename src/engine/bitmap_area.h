@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../tile_set.h"
+#include "tile_set.h"
 
 #include <gb/gb.h>
 

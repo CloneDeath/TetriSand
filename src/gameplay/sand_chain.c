@@ -1,7 +1,7 @@
 #include "sand_chain.h"
-#include "../sand_memory.h"
+#include "../engine/sand_memory.h"
 #include "../global.h"
-#include "../text_area.h"
+#include "../ui/text_area.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

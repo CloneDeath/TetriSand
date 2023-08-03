@@ -1,12 +1,12 @@
 #include "text_area.h"
-#include "allocate.h"
+#include "../engine/allocate.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <gb/gb.h>
-#include "../res/TILES_digits.h"
-#include "../res/TILES_blank.h"
+#include "../../res/TILES_digits.h"
+#include "../../res/TILES_blank.h"
 
 /******* PRIVATE CLASS MEMBERS *******/
 

@@ -1,8 +1,8 @@
 #include "gameplay/sand_zone.h"
 #include "gameplay/piece_master.h"
-#include "tile_border.h"
-#include "tile_set.h"
-#include "text_area.h"
+#include "ui/tile_border.h"
+#include "engine/tile_set.h"
+#include "ui/text_area.h"
 #include "global.h"
 #include "sound/music.h"
 
