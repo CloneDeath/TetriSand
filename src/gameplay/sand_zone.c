@@ -210,6 +210,8 @@ sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand
     return chains;
 }
 
+uint8_t direction = 0;
+
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
 
@@ -224,8 +226,6 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
     this->was_updated = swap;
 
     for (uint8_t x = 0; x < width; x++) {
-        this->was_updated[x] = false;
-
         sand_chain *chain = &this->sand_chains[x];
         sand_chain *prev_chain = chain;
         chain = chain->next;
@@ -236,17 +236,25 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
             prev_chain = chain;
             chain = chain->next;
         }
-    }
 
-    for (uint8_t x = 0; x < width - 1; x++) {
-        if (!this->needs_update[x] && !this->needs_update[x + 1]) continue;
-        _slide_sand_chain(this, x + 1, x);
+        if (direction == 0) {
+            if (x < width - 1) {
+                //if (this->needs_update[x] || this->needs_update[x + 1]) {
+                    _slide_sand_chain(this, x + 1, x);
+                //}
+            }
+            this->needs_update[x] = false;
+        } else {
+            uint8_t local_x = (width - 1) - x;
+            if (local_x > 0) {
+                //if (this->needs_update[local_x - 1] || this->needs_update[local_x]) {
+                    _slide_sand_chain(this, local_x - 1, local_x);
+                //}
+            }
+            this->needs_update[local_x] = false;
+        }
     }
-
-    for (uint8_t x = width - 1; x > 0; x--) {
-        if (!this->needs_update[x] && !this->needs_update[x - 1]) continue;
-        _slide_sand_chain(this, x - 1, x);
-    }
+    direction = (direction+1)%2;
 
     bitmap_area__flush_cache();
 }
