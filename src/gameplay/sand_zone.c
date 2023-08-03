@@ -53,7 +53,6 @@ static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) 
 
     uint8_t connected_length = sand_chain__get_connected_length(current);
 
-
     if (current->y + connected_length - 1 > target_y) {
         uint8_t amount_to_move = ((current->y + connected_length) - target_y) - 1;
         if (amount_to_move > target_gap) amount_to_move = target_gap;
