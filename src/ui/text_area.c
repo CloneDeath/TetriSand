@@ -5,13 +5,25 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <gb/gb.h>
-#include "../../res/TILES_digits.h"
 #include "../../res/TILES_blank.h"
+#include "../../res/TILES_digits.h"
+#include "../../res/TILES_letters.h"
 
 /******* PRIVATE CLASS MEMBERS *******/
 
-tile_set* _digits;
 tile_set* _blank;
+tile_set* _digits;
+tile_set* _letters;
+
+/******* PRIVATE INSTANCE *******/
+
+void _push_tile_index(text_area* this, tile_set* tiles, uint8_t index) {
+    uint8_t tile = tiles->start + index;
+    uint8_t x_offset = this->_cursor % this->width;
+    uint8_t y_offset = (this->_cursor / this->width) % this->height;
+    set_bkg_tile_xy(this->x + x_offset, this->y + y_offset, tile);
+    this->_cursor++;
+}
 
 /******* PUBLIC INSTANCE *******/
 
@@ -25,14 +37,25 @@ void text_area__pop_char(text_area* this) {
     set_bkg_tile_xy(this->x + x_offset, this->y + y_offset, _blank->start);
 }
 
-void text_area__put_digit(text_area* this, uint8_t digit) {
-    assert(digit < 10);
+void text_area__push_char(text_area* this, char character) {
+    if (character >= '0' && character <= '9') {
+        text_area__push_digit(this, character - '0');
+        return;
+    }
+    if (character == ' ') {
+        _push_tile_index(this, _blank, 0);
+    }
+    if (character >= 'A' && character <= 'Z') {
+        _push_tile_index(this, _letters, character - 'A');
+    }
+    if (character >= 'a' && character <= 'z') {
+        _push_tile_index(this, _letters, character - 'a');
+    }
+}
 
-    uint8_t tile = digit + _digits->start;
-    uint8_t x_offset = this->_cursor % this->width;
-    uint8_t y_offset = (this->_cursor / this->width) % this->height;
-    set_bkg_tile_xy(this->x + x_offset, this->y + y_offset, tile);
-    this->_cursor++;
+void text_area__push_digit(text_area* this, uint8_t digit) {
+    assert(digit < 10);
+    _push_tile_index(this, _digits, digit);
 }
 
 void text_area__print_number(text_area* this, int16_t value) {
@@ -48,7 +71,13 @@ void text_area__print_number(text_area* this, int16_t value) {
         }
 
         int16_t digit = v % 10;
-        text_area__put_digit(this, digit);
+        text_area__push_digit(this, digit);
+    }
+}
+
+void text_area__print_text(text_area* this, char* text) {
+    while (*text != '\0') {
+        text_area__put_char(this, text++);
     }
 }
 
@@ -73,12 +102,15 @@ void text_area__clear(text_area* this) {
 /******* PUBLIC CLASS *******/
 
 static inline void __class_new() {
-    if (_digits == NULL) {
+    if (_blank == NULL) {
+        _blank = tile_set__alloc(TILES_blankLen);
+        tile_set__set_data(_blank, TILES_blank);
+
         _digits = tile_set__alloc(TILES_digitsLen);
         tile_set__set_data(_digits, TILES_digits);
 
-        _blank = tile_set__alloc(TILES_blankLen);
-        tile_set__set_data(_blank, TILES_blank);
+        _letters = tile_set__alloc(TILES_lettersLen);
+        tile_set__set_data(_letters, TILES_letters);
     }
 }
 

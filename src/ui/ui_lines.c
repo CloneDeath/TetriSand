@@ -23,6 +23,7 @@ ui_lines* ui_lines__new(uint8_t x, uint8_t y, uint8_t width) {
     this->_sand = 0;
     this->_lines = 0;
     this->_lines_label = text_area__new(x, y, width, 1);
+    text_area__print_text(this->_lines_label, "LINES");
     this->_lines_value = text_area__new(x, y+1, width, 1);
 }
 

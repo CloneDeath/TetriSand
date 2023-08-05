@@ -15,8 +15,10 @@ typedef struct text_area_struct {
 /******* INSTANCE *******/
 
 void text_area__pop_char(text_area* this);
+void text_area__push_char(text_area* this, char character);
 void text_area__push_digit(text_area* this, uint8_t digit);
 void text_area__print_number(text_area* this, int16_t value);
+void text_area__print_text(text_area* this, char* text);
 void text_area__reset(text_area* this);
 
 /******* CLASS *******/
