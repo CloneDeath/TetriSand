@@ -29,6 +29,7 @@
 #define TILES_lettersBank 0
 /* Start of tile array. */
 extern const unsigned char TILES_letters[];
+#define TILES_lettersLen 26
 
 #endif
 
