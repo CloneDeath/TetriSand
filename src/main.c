@@ -1,10 +1,11 @@
 #include "gameplay/sand_zone.h"
 #include "gameplay/piece_master.h"
 #include "ui/tile_border.h"
-#include "engine/tile_set.h"
 #include "ui/text_area.h"
-#include "global.h"
+#include "ui/ui_lines.h"
+#include "engine/tile_set.h"
 #include "sound/music.h"
+#include "global.h"
 
 #include "../res/TITLE/TILES_Title.h"
 #include "../res/TITLE/MAP_Title.h"
@@ -39,13 +40,12 @@ void show_title() {
 }
 
 void run_game() {
-    tile_border* tb = tile_border__new(0, 0, 12, 18);
-    sand_zone* tz = sand_zone__new(1, 1, 10, 16);
-    piece_master* pm = piece_master__new(tz);
-
     tile_border* tb2 = tile_border__new(12, 0, 8, 18);
+    ui_lines* lines = ui_lines__new(13, 1, 6);
 
-    //ta->print_number(ta, 13209);
+    tile_border* tb = tile_border__new(0, 0, 12, 18);
+    sand_zone* tz = sand_zone__new(1, 1, 10, 16, lines);
+    piece_master* pm = piece_master__new(tz);
 
     while (true) {
         sand_zone__update_sand(tz);

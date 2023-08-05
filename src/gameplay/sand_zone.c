@@ -143,6 +143,7 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
     if (sand_chain_list__contains_x(processed, this->width * 8 - 1)) {
         sand_chain_reference* current = processed->_first;
         while (current != NULL) {
+            ui_lines__add_sand(this->_lines, current->chain->length);
             _set_sand_color_column(this, current->x, current->chain->y, current->chain->length, DMG_WHITE);
             current->chain->value = 0;
             current->chain->length = 0;
@@ -273,23 +274,24 @@ bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED {
 
 /******* PUBLIC CLASS *******/
 
-sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height) BANKED {
-    sand_zone* tz = allocate(sizeof(sand_zone));
-    tz->x = x;
-    tz->y = y;
-    tz->width = width;
-    tz->height = height;
+sand_zone* sand_zone__new(uint8_t x, uint8_t y, uint8_t width, uint8_t height, ui_lines* lines) BANKED {
+    sand_zone* zone = allocate(sizeof(sand_zone));
+    zone->x = x;
+    zone->y = y;
+    zone->width = width;
+    zone->height = height;
+    zone->_lines = lines;
 
-    tz->bitmap_area = bitmap_area__new(x, y, width, height);
+    zone->bitmap_area = bitmap_area__new(x, y, width, height);
 
-    tz->sand_chains = sand_chain__new_array(tz->width * 8);
+    zone->sand_chains = sand_chain__new_array(zone->width * 8);
 
-    tz->needs_update = allocate_array(tz->width * 8, sizeof(bool));
-    tz->was_updated = allocate_array(tz->width * 8, sizeof(bool));
+    zone->needs_update = allocate_array(zone->width * 8, sizeof(bool));
+    zone->was_updated = allocate_array(zone->width * 8, sizeof(bool));
 
-    tz->start_to_end_triggered = true;
+    zone->start_to_end_triggered = true;
 
-    return tz;
+    return zone;
 }
 
 void sand_zone__delete(sand_zone* this) BANKED {

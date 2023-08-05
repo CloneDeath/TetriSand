@@ -44,13 +44,18 @@ void text_area__push_char(text_area* this, char character) {
     }
     if (character == ' ') {
         _push_tile_index(this, _blank, 0);
+        return;
     }
     if (character >= 'A' && character <= 'Z') {
         _push_tile_index(this, _letters, character - 'A');
+        return;
     }
     if (character >= 'a' && character <= 'z') {
         _push_tile_index(this, _letters, character - 'a');
+        return;
     }
+    printf("TextArea does not support character '%c'!", character);
+    exit(-1);
 }
 
 void text_area__push_digit(text_area* this, uint8_t digit) {
@@ -77,7 +82,7 @@ void text_area__print_number(text_area* this, int16_t value) {
 
 void text_area__print_text(text_area* this, char* text) {
     while (*text != '\0') {
-        text_area__put_char(this, text++);
+        text_area__push_char(this, *(text++));
     }
 }
 

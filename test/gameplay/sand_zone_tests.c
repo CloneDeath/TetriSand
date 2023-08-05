@@ -12,7 +12,7 @@ BANKREF(test__sand_zone)
 void test__sand_zone__get_connected_chains_in_column() BANKED {
     /* able to get items on the right */
     {
-        sand_zone* zone = sand_zone__new(0, 0, 1, 1);
+        sand_zone* zone = sand_zone__new(0, 0, 1, 1, NULL);
         sand_zone__add_sand(zone, 0, 0, 2, 1);
         sand_zone__add_sand(zone, 1, 0, 2, 1);
         sand_chain* current = zone->sand_chains[0].next;

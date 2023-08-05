@@ -5,6 +5,7 @@
 #define SAND_PER_LINE 640
 
 /******* INSTANCE *******/
+
 void ui_lines__add_sand(ui_lines* this, uint8_t amount) {
     this->_sand += amount;
     if (this->_sand >= SAND_PER_LINE) {
@@ -25,6 +26,7 @@ ui_lines* ui_lines__new(uint8_t x, uint8_t y, uint8_t width) {
     this->_lines_label = text_area__new(x, y, width, 1);
     text_area__print_text(this->_lines_label, "LINES");
     this->_lines_value = text_area__new(x, y+1, width, 1);
+    text_area__print_number(this->_lines_value, 0);
 }
 
 void ui_lines__delete(ui_lines* this) {
