@@ -191,14 +191,14 @@ void piece_master__update(piece_master *this) BANKED {
             this->x -= 1;
         }
     }
-    if (this->x < _get_min_x(this)) this->x = _get_min_x(this);
-    if (this->x > _get_max_x(this)) this->x = _get_max_x(this);
     if (this->current_input & J_A && !(this->previous_input & J_A)) {
         this->rotated = (this->rotated - 1) % 4;
     }
     if (this->current_input & J_B && !(this->previous_input & J_B)) {
         this->rotated = (this->rotated + 1) % 4;
     }
+    if (this->x < _get_min_x(this)) this->x = _get_min_x(this);
+    if (this->x > _get_max_x(this)) this->x = _get_max_x(this);
 
     this->y -= 1;
     _adjust_sprites(this);
