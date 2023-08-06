@@ -3,13 +3,13 @@
 #include "ui/tile_border.h"
 #include "ui/text_area.h"
 #include "ui/ui_lines.h"
+#include "ui/ui_game_over.h"
 #include "engine/tile_set.h"
 #include "sound/music.h"
 #include "global.h"
 
 #include "../res/TITLE/TILES_Title.h"
 #include "../res/TITLE/MAP_Title.h"
-
 
 #include <stdbool.h>
 #include <rand.h>
@@ -42,27 +42,34 @@ void show_title() {
 #include "stdio.h"
 
 void run_game() {
-    tile_border* tb2 = tile_border__new(12, 0, 8, 18);
+    tile_border* lines_border = tile_border__new(12, 0, 8, 18);
     ui_lines* lines = ui_lines__new(13, 1, 6);
 
-    tile_border* tb = tile_border__new(0, 0, 12, 18);
-    sand_zone* tz = sand_zone__new(1, 1, 10, 16, lines);
-    piece_master* pm = piece_master__new(tz);
+    ui_game_over* game_over = ui_game_over__new(13, 4, 6);
+
+    tile_border* sand_zone_border = tile_border__new(0, 0, 12, 18);
+    sand_zone* sand_zone = sand_zone__new(1, 1, 10, 16, lines);
+    piece_master* pm = piece_master__new(sand_zone);
 
     while (true) {
-        sand_zone__update_sand(tz);
+        sand_zone__update_sand(sand_zone);
         piece_master__update(pm);
         if (pm->game_over) {
-            printf("GAME OVER");
+            ui_game_over__show(game_over);
+            break;
         }
 
         wait_vbl_done();
     }
 
-    // sand_zone__delete(tz);
-    // tile_border__delete(tb);
-    // tile_border__delete(tb2);
-    // piece_master__delete(pm);
+    piece_master__delete(pm);
+    sand_zone__delete(sand_zone);
+    tile_border__delete(sand_zone_border);
+
+    ui_game_over__delete(game_over);
+
+    ui_lines__delete(lines);
+    tile_border__delete(lines_border);
 }
 
 int main(void) {
