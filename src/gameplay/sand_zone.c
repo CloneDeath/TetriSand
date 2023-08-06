@@ -12,39 +12,43 @@
 
 #include <gb/gb.h>
 
-static inline void _move_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
-    this->was_updated[x] = true;
-    this->start_to_end_triggered = false;
-
-    chain->y -= 1;
-    bitmap_area__set_color(this->bitmap_area, x, chain->y, chain->value);
-    bitmap_area__set_color(this->bitmap_area, x, chain->y + chain->length, DMG_WHITE);
-}
-
 static inline void _set_sand_color_column(sand_zone* this, uint8_t x, uint8_t y, uint8_t height, uint8_t value) {
     for (uint8_t i = 0; i < height; i++) {
         bitmap_area__set_color(this->bitmap_area, x, y + i, value);
     }
 }
 
+static inline void _delete_next_sand_chain(sand_zone* this, uint8_t x, sand_chain* previous) {
+    sand_chain* next = previous->next;
+    _set_sand_color_column(this, x, next->y, next->length, DMG_WHITE);
+    next->length = 0;
+    sand_chain__try_to_combine(previous);
+}
+
+static inline void _move_next_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
+    sand_chain* next = chain->next;
+    if (next->y > chain->y + chain->length) {
+        this->was_updated[x] = true;
+        this->start_to_end_triggered = false;
+
+        next->y -= 1;
+        bitmap_area__set_color(this->bitmap_area, x, next->y, next->value);
+        bitmap_area__set_color(this->bitmap_area, x, next->y + next->length, DMG_WHITE);
+
+        sand_chain__try_to_combine(chain);
+    }
+}
+
 static inline sand_chain* _get_or_create_destination_chain(sand_zone* this, uint8_t x){
     sand_chain *chain = &this->sand_chains[x];
-    if (chain->y > 0) {
-        sand_chain* root = sand_chain__copy(chain);
-        chain->next = root;
-        chain->y = 0;
-        chain->length = 0;
-        chain->value = 0;
-        return chain;
-    }
     sand_chain *last_connected = sand_chain__get_last_connected(chain);
     return last_connected;
 }
 
 static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) {
-    sand_chain* current = this->sand_chains[x].next;
-    if (current == NULL) return;
-    if (current->y > 0) return; // sand-chain is still falling
+    sand_chain* current = &this->sand_chains[x];
+    if (current->next == NULL) return;
+    if (current->next->y > 0) return; // sand-chain is still falling
 
     sand_chain* dest = _get_or_create_destination_chain(this, new_x);
 
@@ -53,8 +57,8 @@ static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) 
 
     uint8_t connected_length = sand_chain__get_connected_length(current);
 
-    if (current->y + connected_length - 1 > target_y) {
-        uint8_t amount_to_move = ((current->y + connected_length) - target_y) - 1;
+    if (connected_length - 1 > target_y) {
+        uint8_t amount_to_move = (connected_length - target_y) - 1;
         if (amount_to_move > target_gap) amount_to_move = target_gap;
 
         sand_chain* to_move = sand_chain__excise_chain(current, target_y + 1, amount_to_move);
@@ -79,24 +83,18 @@ static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) 
     }
 }
 
-static inline void _collapse_empty_and_similar_chains(sand_zone* this) {
+static inline void _detect_empty_and_similar_chains(sand_zone* this) {
     uint8_t width = this->width * 8;
     for (uint8_t x = 0; x < width; x++) {
-        sand_chain *current = &this->sand_chains[x];
-        current = current->next;
-
-        while (current != NULL && current->next != NULL) {
+        sand_chain* current = &this->sand_chains[x];
+        while (current->next != NULL) {
             sand_chain *next = current->next;
-            if (current->length == 0) {
-                current->y = next->y;
-                current->length = next->length;
-                current->value = next->value;
-                current->next = next->next;
-                next->next = NULL;
-                sand_chain__delete(next);
+
+            if (next->length == 0) {
+                printf("DETECTED INVALID CHAIN");
+                exit(-1);
                 continue;
             }
-            sand_chain__try_to_combine(current);
             current = current->next;
         }
     }
@@ -117,66 +115,88 @@ static inline sand_chain_list* __get_same_color_chains_adjacent_to(sand_zone* th
     return chains;
 }
 
-uint16_t to_process_length = 0;
-uint16_t processed_length = 0;
+static inline void _clear_out_chains_in_family(sand_zone* this, uint8_t family) {
+    uint8_t width = this->width * 8;
 
-static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_chain* current) {
-    sand_chain_list* processed = sand_chain_list__new();
+    for (uint8_t x = 0; x < width; x++) {
+        sand_chain* previous = &this->sand_chains[x];
+        sand_chain* current = previous->next;
+        while (current != NULL) {
+            if (current->family == family) {
+                ui_lines__add_sand(this->_lines, current->length);
+                _delete_next_sand_chain(this, x, previous);
+            }
+            previous = current;
+            current = current->next;
+        }
+    }
+}
+
+static inline bool _family_reached_end(sand_zone* this, uint8_t family) {
+    uint8_t width = this->width * 8;
+    sand_chain* end = this->sand_chains[width-1].next;
+
+    while (end != NULL) {
+        if (end->family == family) return true;
+        end = end->next;
+    }
+    return false;
+}
+
+uint16_t to_process_length = 0;
+static inline void _check_for_start_to_end_path_for_chain(sand_zone* this, sand_chain* current, uint8_t family) {
     sand_chain_list* to_process = sand_chain_list__new();
-    processed_length = 0;
     to_process_length = 0;
 
     sand_chain_list__push_front(to_process, current, 0);
 
     while (sand_chain_list__has_any(to_process)) {
-        processed_length = processed->length;
         to_process_length = to_process->length;
 
-        sand_chain_reference* current = sand_chain_list__pop_front(to_process);
-
-        if (sand_chain_list__contains(processed, current->chain)) {
-            sand_chain_reference__delete_single(current);
+        sand_chain_reference* ref = sand_chain_list__pop_front(to_process);
+        if (ref->chain->family == family) {
+            sand_chain_reference__delete_single(ref);
             continue;
         }
-        sand_chain_list__push_front_reference(processed, current);
+        ref->chain->family = family;
 
-        sand_chain_list* adjacent = __get_same_color_chains_adjacent_to(this, current->chain, current->x);
+        sand_chain_list* adjacent = __get_same_color_chains_adjacent_to(this, ref->chain, ref->x);
         to_process = sand_chain_list__combine(to_process, adjacent);
     }
 
-    if (sand_chain_list__contains_x(processed, this->width * 8 - 1)) {
-        sand_chain_reference* current = processed->_first;
-        while (current != NULL) {
-            ui_lines__add_sand(this->_lines, current->chain->length);
-            _set_sand_color_column(this, current->x, current->chain->y, current->chain->length, DMG_WHITE);
-            current->chain->value = 0;
-            current->chain->length = 0;
-            current = current->next;
-        }
-        processed_length = 0;
-        to_process_length = 0;
-        sand_chain_list__delete(processed);
-        sand_chain_list__delete(to_process);
-        return true;
-    }
-
-    processed_length = 0;
     to_process_length = 0;
-    sand_chain_list__delete(processed);
     sand_chain_list__delete(to_process);
-    return false;
+
+    if (_family_reached_end(this, family)) {
+        _clear_out_chains_in_family(this, family);
+    }
 }
 
+
+static inline void _clear_all_families(sand_zone* this) {
+    uint8_t width = this->width * 8;
+    for (uint8_t i = 0; i < width; i++) {
+        sand_chain * current = this->sand_chains[i].next;
+        while (current != NULL) {
+            current->family = 0;
+            current = current->next;
+        }
+    }
+}
 static inline void _check_for_start_to_end_path(sand_zone* this) {
     this->start_to_end_triggered = true;
+
+    _clear_all_families(this);
+
     sand_chain* current = this->sand_chains[0].next;
 
+    uint8_t current_family = 0;
     while (current != NULL) {
-        if (_check_for_start_to_end_path_for_chain(this, current)) {
-            _collapse_empty_and_similar_chains(this);
-            return;
+        if (++current_family >= 32) {
+            current_family = 1;
+            _clear_all_families(this);
         }
-
+        _check_for_start_to_end_path_for_chain(this, current, current_family);
         current = current->next;
     }
 }
@@ -218,7 +238,7 @@ sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand
 }
 
 void sand_zone__update_sand(sand_zone* this) BANKED {
-    _collapse_empty_and_similar_chains(this);
+    _detect_empty_and_similar_chains(this);
 
 #ifndef SKIP_FIND_FAMILIES
     if (_should_check_for_start_to_end_path(this)) {
@@ -236,13 +256,9 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         this->was_updated[x] = false;
 
         sand_chain *chain = &this->sand_chains[x];
-        sand_chain *prev_chain = chain;
-        chain = chain->next;
-        while (chain) {
-            if (chain->y > prev_chain->y + prev_chain->length) {
-                _move_chain_down(this, x, chain);
-            }
-            prev_chain = chain;
+
+        while (chain != NULL) {
+            _move_next_chain_down(this, x, chain);
             chain = chain->next;
         }
     }
@@ -275,11 +291,11 @@ void sand_zone__add_sand(sand_zone* this, uint8_t x, uint8_t y, uint8_t length, 
 }
 
 bool sand_zone__has_sand_at(sand_zone* this, uint8_t x, uint8_t y) BANKED {
-    return bitmap_area__get_color(this->bitmap_area, x, y) > 0;
-    /*sand_chain* chain = &this->sand_chains[x];
+    //return bitmap_area__get_color(this->bitmap_area, x, y) > 0;
+    sand_chain* chain = &this->sand_chains[x];
     sand_chain* top = sand_chain__get_last_connected(chain);
     uint8_t height = top->y + top->length;
-    return y < height;*/
+    return y < height;
 }
 
 /******* PUBLIC CLASS *******/

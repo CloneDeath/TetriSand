@@ -21,16 +21,16 @@ sand_chain* first_free = NULL;
 /******* PRIVATE CLASS FUNCTIONS *******/
 
 inline static bool __is_free(sand_chain* chain) {
-    return chain->value == 255;
+    return chain->is_free;
 }
 inline static bool __is_used(sand_chain* chain) {
     return !__is_free(chain);
 }
 inline static void __set_free(sand_chain* chain) {
-    chain->value = 255;
+    chain->is_free = 1;
 }
 inline static void __set_used(sand_chain* chain) {
-    chain->value = 254;
+    chain->is_free = 0;
 }
 inline static void __initialize_array(sand_chain* start, size_t count) {
     for (size_t i = 0; i < count; i++) {

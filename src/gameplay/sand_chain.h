@@ -6,7 +6,9 @@
 typedef struct sand_chain_struct {
     uint8_t y;
     uint8_t length;
-    uint8_t value;
+    uint8_t value: 2;
+    uint8_t is_free: 1;
+    uint8_t family: 5;
     struct sand_chain_struct* next;
 } sand_chain;
 

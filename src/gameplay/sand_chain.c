@@ -11,6 +11,9 @@
 /******* PRIVATE INSTANCE *******/
 
 sand_chain* _split(sand_chain* this, uint8_t split_after) {
+    if (split_after == 0) {
+        return this;
+    }
     sand_chain* next = sand_chain__new(this->y + split_after, this->length - split_after, this->value);
     next->next = this->next;
     this->next = NULL;
@@ -69,7 +72,8 @@ uint8_t sand_chain__get_gap_above(sand_chain* this) {
         return 255 - this->y - this->length;
     }
     if (this->next->y < this->y + this->length) {
-        return 127;
+        printf("NEXT CHAIN COLLIDES WITH CURRENT CHAIN");
+        exit(-1);
     }
     return this->next->y - (this->y + this->length);
 }
@@ -81,7 +85,8 @@ uint8_t sand_chain__get_connected_length(sand_chain* this) {
 
 sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t length) {
     // find first chain to excise from
-    sand_chain* first_chain = this;
+    sand_chain* prev_chain = this;
+    sand_chain* first_chain = this->next;
     while (first_chain != NULL) {
         if (first_chain->y <= from && first_chain->y + first_chain->length > from) {
             break;
@@ -92,6 +97,9 @@ sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t len
     uint8_t split_after = from - first_chain->y;
     sand_chain* split_chain = _split(first_chain, split_after);
     sand_chain* current = split_chain;
+    if (split_after == 0) {
+        first_chain = prev_chain;
+    }
 
     uint8_t total = current->length;
     while (total < length) {
@@ -113,6 +121,12 @@ sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t len
 
 void sand_chain__try_to_combine(sand_chain *this) {
     sand_chain* next = this->next;
+    while (next != NULL && next->length == 0) {
+        this->next = next->next;
+        next->next = NULL;
+        sand_chain__delete(next);
+        next = this->next;
+    }
     if (next == NULL) return;
     if (this->value != next->value) return;
     if (this->y + this->length < next->y) return;
@@ -120,6 +134,7 @@ void sand_chain__try_to_combine(sand_chain *this) {
     this->length += next->length;
     this->next = next->next;
     next->next = NULL;
+    this->family = 0;
     sand_chain__delete(next);
 }
 
@@ -149,6 +164,7 @@ sand_chain* sand_chain__new(uint8_t y, uint8_t length, uint8_t value) {
     chain->y = y;
     chain->length = length;
     chain->value = value;
+    chain->family = 0;
     chain->next = NULL;
     return chain;
 }
@@ -164,6 +180,7 @@ sand_chain* sand_chain__copy(sand_chain* original) {
     chain->length = original->length;
     chain->value = original->value;
     chain->next = original->next;
+    chain->family = 0;
     return chain;
 }
 
