@@ -101,7 +101,7 @@ uint8_t bitmap_area__get_color(bitmap_area* this, uint8_t x, uint8_t y) BANKED {
 void bitmap_area__set_color(bitmap_area* this, uint8_t x, uint8_t y, uint8_t value) BANKED {
     if (x > this->width * 8 || y > this->height * 8) {
         HIDE_SPRITES;
-        printf("BOUNDS FAULT - %hu %hu", x, y);
+        printf("BOUNDS FAULT - x:%hu y:%hu", (uint8_t)x, (uint8_t)y);
         exit(-1);
     }
 

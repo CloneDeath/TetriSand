@@ -27,6 +27,7 @@ static inline void _delete_next_sand_chain(sand_zone* this, uint8_t x, sand_chai
 
 static inline void _move_next_chain_down(sand_zone* this, uint8_t x, sand_chain* chain) {
     sand_chain* next = chain->next;
+    if (next == NULL) return;
     if (next->y > chain->y + chain->length) {
         this->was_updated[x] = true;
         this->start_to_end_triggered = false;
