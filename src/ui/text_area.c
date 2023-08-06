@@ -38,6 +38,12 @@ void text_area__pop_char(text_area* this) {
 }
 
 void text_area__push_char(text_area* this, char character) {
+    if (character == '\n') {
+        this->_cursor = this->_cursor + this->width;
+        uint8_t extra = this->_cursor % this->width;
+        this->_cursor -= extra;
+        return;
+    }
     if (character >= '0' && character <= '9') {
         text_area__push_digit(this, character - '0');
         return;
