@@ -91,6 +91,7 @@ sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t len
         if (first_chain->y <= from && first_chain->y + first_chain->length > from) {
             break;
         }
+        prev_chain = first_chain;
         first_chain = first_chain->next;
     }
 
