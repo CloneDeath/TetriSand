@@ -5,6 +5,9 @@
 #include "stdbool.h"
 
 typedef struct sand_chain_list_struct {
+    // public:
+    uint16_t length;
+
     // private:
     sand_chain_reference* _first;
     sand_chain_reference* _last;

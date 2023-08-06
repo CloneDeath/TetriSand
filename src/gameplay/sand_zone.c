@@ -117,17 +117,21 @@ static inline sand_chain_list* __get_same_color_chains_adjacent_to(sand_zone* th
     return chains;
 }
 
-static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_chain* current) {
-    uint8_t width = this->width * 8;
-    sand_chain_list* stacks = sand_chain_list__new_array(width);
-    sand_chain_list__push_front(stacks + 0, current, 0);
+uint16_t to_process_length = 0;
+uint16_t processed_length = 0;
 
+static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_chain* current) {
     sand_chain_list* processed = sand_chain_list__new();
     sand_chain_list* to_process = sand_chain_list__new();
+    processed_length = 0;
+    to_process_length = 0;
 
     sand_chain_list__push_front(to_process, current, 0);
 
     while (sand_chain_list__has_any(to_process)) {
+        processed_length = processed->length;
+        to_process_length = to_process->length;
+
         sand_chain_reference* current = sand_chain_list__pop_front(to_process);
 
         if (sand_chain_list__contains(processed, current->chain)) {
@@ -149,15 +153,17 @@ static inline bool _check_for_start_to_end_path_for_chain(sand_zone* this, sand_
             current->chain->length = 0;
             current = current->next;
         }
+        processed_length = 0;
+        to_process_length = 0;
         sand_chain_list__delete(processed);
         sand_chain_list__delete(to_process);
-        sand_chain_list__delete_array(stacks, width);
         return true;
     }
 
+    processed_length = 0;
+    to_process_length = 0;
     sand_chain_list__delete(processed);
     sand_chain_list__delete(to_process);
-    sand_chain_list__delete_array(stacks, width);
     return false;
 }
 

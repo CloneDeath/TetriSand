@@ -3,8 +3,12 @@
 #include "../engine/allocate.h"
 #include "sand_chain.h"
 
+uint16_t total = 0;
+
 /******* CLASS *******/
+
 sand_chain_reference* sand_chain_reference__new(sand_chain* chain, uint8_t x, sand_chain_reference* next) {
+    total += 1;
     sand_chain_reference* this = allocate(sizeof(sand_chain_reference));
     this->chain = chain;
     this->next = next;
@@ -13,6 +17,7 @@ sand_chain_reference* sand_chain_reference__new(sand_chain* chain, uint8_t x, sa
 }
 
 void sand_chain_reference__delete_single(sand_chain_reference* this) {
+    total -= 1;
     free(this);
 }
 

@@ -29,6 +29,7 @@ bool sand_chain_list__has_any(sand_chain_list* this) {
 }
 
 void sand_chain_list__push_front(sand_chain_list* this, sand_chain* item, uint8_t x) {
+    this->length++;
     this->_first = sand_chain_reference__new(item, x, this->_first);
     if (this->_last == NULL) {
         this->_last = this->_first;
@@ -36,6 +37,7 @@ void sand_chain_list__push_front(sand_chain_list* this, sand_chain* item, uint8_
 }
 
 void sand_chain_list__push_front_reference(sand_chain_list* this, sand_chain_reference* ref) {
+    this->length++;
     ref->next = this->_first;
     this->_first = ref;
     if (this->_last == NULL) {
@@ -44,6 +46,8 @@ void sand_chain_list__push_front_reference(sand_chain_list* this, sand_chain_ref
 }
 
 sand_chain_reference* sand_chain_list__pop_front(sand_chain_list* this) {
+    if (this->_first == NULL) return NULL;
+    this->length--;
     sand_chain_reference* ref = this->_first;
     this->_first = ref->next;
     ref->next = NULL;
@@ -70,6 +74,7 @@ sand_chain_list* sand_chain_list__combine(sand_chain_list* this, sand_chain_list
     this->_last = other->_last;
     other->_first = NULL;
     other->_last = NULL;
+    this->length += other->length;
     sand_chain_list__delete(other);
     return this;
 }
@@ -78,6 +83,7 @@ sand_chain_list* sand_chain_list__new() {
     sand_chain_list* this = allocate(sizeof(sand_chain_list));
     this->_first = NULL;
     this->_last = NULL;
+    this->length = 0;
     return this;
 }
 
