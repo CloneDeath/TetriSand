@@ -170,9 +170,15 @@ void piece_master__update(piece_master *this) BANKED {
 
     if (this->current_input & J_LEFT && this->x > _get_min_x(this)) {
         this->x -= 1;
+        if (_piece_is_touching_sand(this)) {
+            this->x += 1;
+        }
     }
     if (this->current_input & J_RIGHT && this->x < _get_max_x(this)) {
         this->x += 1;
+        if (_piece_is_touching_sand(this)) {
+            this->x -= 1;
+        }
     }
     if (this->x < _get_min_x(this)) this->x = _get_min_x(this);
     if (this->x > _get_max_x(this)) this->x = _get_max_x(this);
