@@ -220,9 +220,11 @@ sand_chain_list* sand_zone__get_connected_chains_in_column(sand_zone* this, sand
 void sand_zone__update_sand(sand_zone* this) BANKED {
     _collapse_empty_and_similar_chains(this);
 
+#ifndef SKIP_FIND_FAMILIES
     if (_should_check_for_start_to_end_path(this)) {
         _check_for_start_to_end_path(this);
     }
+#endif
 
     uint8_t width = this->width * 8;
 
@@ -245,6 +247,7 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         }
     }
 
+#ifndef SKIP_SLIDE_SAND
     for (uint8_t x = 0; x < width - 1; x++) {
         if (!this->needs_update[x] && !this->needs_update[x + 1]) continue;
         _slide_sand_chain(this, x + 1, x);
@@ -254,6 +257,7 @@ void sand_zone__update_sand(sand_zone* this) BANKED {
         if (!this->needs_update[x] && !this->needs_update[x - 1]) continue;
         _slide_sand_chain(this, x - 1, x);
     }
+#endif
 
     bitmap_area__flush_cache();
 }

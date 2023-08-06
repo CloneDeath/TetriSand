@@ -32,6 +32,9 @@ LCCFLAGS += -autobank -Wb-ext=.rel
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
 LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m -O0
 
+LCCFLAGS += -DSKIP_FIND_FAMILIES
+LCCFLAGS += -DSKIP_SLIDE_SAND
+
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
 
