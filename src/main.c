@@ -39,6 +39,8 @@ void show_title() {
     SWITCH_ROM( previous_bank );
 }
 
+#include "stdio.h"
+
 void run_game() {
     tile_border* tb2 = tile_border__new(12, 0, 8, 18);
     ui_lines* lines = ui_lines__new(13, 1, 6);
@@ -50,6 +52,9 @@ void run_game() {
     while (true) {
         sand_zone__update_sand(tz);
         piece_master__update(pm);
+        if (pm->game_over) {
+            printf("GAME OVER");
+        }
 
         wait_vbl_done();
     }

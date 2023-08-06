@@ -103,6 +103,17 @@ static inline uint8_t _get_max_x(piece_master* this) {
     return (this->zone->width * 8) - (max_x + 8);
 }
 
+static inline uint8_t _get_max_y(piece_master* this) {
+    int8_t max_y = 0;
+    for (uint8_t i = 0; i < 4; i++) {
+        int8_t y = _get_sub_piece_y(this, i);
+        if (y > max_y) {
+            max_y = y;
+        }
+    }
+    return (this->zone->height * 8) - (max_y + 8);
+}
+
 static inline void _adjust_sprites(piece_master *this) {
     for (uint8_t i = 0; i < 4; i++) {
         _move_sprite_to(this, i, this->x + _get_sub_piece_x(this, i), this->y + _get_sub_piece_y(this, i));
@@ -193,6 +204,10 @@ void piece_master__update(piece_master *this) BANKED {
     _adjust_sprites(this);
 
     if (this->y <= _get_min_y(this) || _piece_is_touching_sand(this)) {
+        if (this->y > _get_max_y(this)) {
+            this->game_over = true;
+            return;
+        }
         _spawn_sand(this);
         this->needs_new_piece = true;
     }
