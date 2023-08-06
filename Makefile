@@ -33,7 +33,7 @@ LCCFLAGS += -autobank -Wb-ext=.rel
 LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m -O0
 
 LCCFLAGS += -DSKIP_FIND_FAMILIES
-LCCFLAGS += -DSKIP_SLIDE_SAND
+#LCCFLAGS += -DSKIP_SLIDE_SAND
 
 # You can set the name of the .gb ROM file here
 PROJECTNAME    = TetriSand
