@@ -11,17 +11,20 @@ void test_sand_chain__excise_chain() {
 
     sand_chain* split = sand_chain__excise_chain(chain, 3, 5);
 
+    ASSERT(chain->is_free == 0);
     ASSERT(chain->y == 0);
     ASSERT(chain->length == 3);
     ASSERT(chain->value == 3);
 
     ASSERT(chain->next != split);
+    ASSERT(chain->next->is_free == 0);
     ASSERT(chain->next->y == 8);
     ASSERT(chain->next->length == 2);
     ASSERT(chain->next->value == 3);
     ASSERT(chain->next->next == NULL);
 
     ASSERT(split != NULL);
+    ASSERT(split->is_free == 0);
     ASSERT(split->y == 3);
     ASSERT(split->length == 5);
     ASSERT(split->value == 3);
