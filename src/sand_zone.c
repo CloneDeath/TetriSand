@@ -46,7 +46,7 @@ static inline sand_chain* _get_or_create_destination_chain(sand_zone* this, uint
     return last_connected;
 }
 
-static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) {
+static void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) {
     sand_chain* current = &this->sand_chains[x];
     if (current->next == NULL) return;
     if (current->next->y > 0) return; // sand-chain is still falling

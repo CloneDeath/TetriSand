@@ -37,6 +37,8 @@ inline static void __initialize_array(sand_chain* start, size_t count) {
         __set_used(start+i);
         (start+i)->y = 0;
         (start+i)->length = 0;
+        (start+i)->value = 0;
+        (start+i)->family = 0;
         (start+i)->next = NULL;
     }
 }
