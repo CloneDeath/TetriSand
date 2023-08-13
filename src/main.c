@@ -1,15 +1,15 @@
-#include "gameplay/sand_zone.h"
-#include "gameplay/piece_master.h"
-#include "ui/tile_border.h"
-#include "ui/text_area.h"
-#include "ui/ui_lines.h"
-#include "ui/ui_game_over.h"
-#include "engine/tile_set.h"
-#include "sound/music.h"
+#include "sand_zone.h"
+#include "piece_master.h"
+#include "tile_border.h"
+#include "text_area.h"
+#include "ui_lines.h"
+#include "ui_game_over.h"
+#include "tile_set.h"
+#include "music.h"
 #include "global.h"
 
-#include "../res/TITLE/TILES_Title.h"
-#include "../res/TITLE/MAP_Title.h"
+#include "../res/TILES_Title.h"
+#include "../res/MAP_Title.h"
 
 #include <stdbool.h>
 #include <rand.h>

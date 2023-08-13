@@ -1,6 +1,6 @@
 #include "sand_chain_reference.h"
 
-#include "../engine/allocate.h"
+#include "allocate.h"
 #include "sand_chain.h"
 
 uint16_t total = 0;

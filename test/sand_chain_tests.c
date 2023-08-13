@@ -1,8 +1,8 @@
 #include "sand_chain_tests.h"
 
-#include "../test.h"
+#include "test.h"
 
-#include "../../src/gameplay/sand_chain.h"
+#include "../src/sand_chain.h"
 
 #include "stdio.h"
 

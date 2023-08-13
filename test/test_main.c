@@ -1,9 +1,9 @@
 #include <gb/gb.h>
 #include "test.h"
 
-#include "gameplay/sand_chain_tests.h"
-#include "gameplay/sand_chain_list_tests.h"
-#include "gameplay/sand_zone_tests.h"
+#include "sand_chain_tests.h"
+#include "sand_chain_list_tests.h"
+#include "sand_zone_tests.h"
 
 const struct test test_list[] = {
     /* sand_chain */

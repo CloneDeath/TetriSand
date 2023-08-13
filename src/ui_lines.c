@@ -1,6 +1,6 @@
 #include "ui_lines.h"
 
-#include "../engine/allocate.h"
+#include "allocate.h"
 
 #define SAND_PER_LINE 640
 

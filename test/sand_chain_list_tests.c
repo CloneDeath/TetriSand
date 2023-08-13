@@ -2,9 +2,9 @@
 
 #include "sand_chain_list_tests.h"
 
-#include "../../src/gameplay/sand_chain_list.h"
+#include "../src/sand_chain_list.h"
 
-#include "../test.h"
+#include "test.h"
 
 #include <gb/gb.h>
 

@@ -2,8 +2,8 @@
 
 #include "sand_zone.h"
 #include "sand_chain_list.h"
-#include "../engine/allocate.h"
-#include "../engine/tile_set.h"
+#include "allocate.h"
+#include "tile_set.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

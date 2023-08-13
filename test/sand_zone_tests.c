@@ -1,9 +1,9 @@
 #pragma bank 255
 
 #include "sand_zone_tests.h"
-#include "../test.h"
+#include "test.h"
 
-#include "../../src/gameplay/sand_zone.h"
+#include "../src/sand_zone.h"
 
 #include <gb/gb.h>
 

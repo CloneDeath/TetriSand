@@ -1,9 +1,9 @@
 #pragma bank 255
 
 #include "piece_master.h"
-#include "../engine/allocate.h"
+#include "allocate.h"
 
-#include "../../res/tetromino.h"
+#include "../res/tetromino.h"
 
 #include <stdlib.h>
 #include <rand.h>

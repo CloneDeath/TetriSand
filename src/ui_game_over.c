@@ -1,6 +1,6 @@
 #include "ui_game_over.h"
 
-#include "../engine/allocate.h"
+#include "allocate.h"
 
 /******* INSTANCE *******/
 void ui_game_over__show(ui_game_over* this) {

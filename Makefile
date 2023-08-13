@@ -44,9 +44,9 @@ RESDIR      = res
 TESTDIR     = test
 BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
 TESTS		= $(OBJDIR)/test.gb
-CSOURCES    = $(shell find $(SRCDIR) $(RESDIR) -type f -name '*.c')
-ASMSOURCES  = $(shell find $(SRCDIR) -type f -name '*.s')
-TSOURCES    = $(shell find $(TESTDIR) -type f -name '*.c')
+CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
+ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
+TSOURCES    = $(foreach dir,$(TESTDIR),$(notdir $(wildcard $(dir)/*.c)))
 OBJS        = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 TOBJS       = $(TSOURCES:%.c=$(OBJDIR)/%.o)
 
@@ -54,20 +54,25 @@ all: prepare $(BINS) $(TESTS)
 
 prepare:
 	mkdir -p $(OBJDIR)
-	$(shell find $(SRCDIR) -type d | sed 's/$(SRCDIR)/$(OBJDIR)\/$(SRCDIR)/' | xargs mkdir -p)
-	$(shell find $(RESDIR) -type d | sed 's/$(RESDIR)/$(OBJDIR)\/$(RESDIR)/' | xargs mkdir -p)
-	$(shell find $(TESTDIR) -type d | sed 's/$(TESTDIR)/$(OBJDIR)\/$(TESTDIR)/' | xargs mkdir -p)
 
 compile.bat: Makefile
 	@echo "REM Automatically generated from Makefile" > compile.bat
 	@make -sn | sed y/\\//\\\\/ | grep -v make >> compile.bat
 
-# Compile .c files in "src/", "res/", and "test/", and their subdirectories to .o object files
-$(OBJDIR)/%.o: %.c
+# Compile .c files in "src/" to .o object files
+$(OBJDIR)/%.o:	$(SRCDIR)/%.c
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
-# Compile .s assembly files in "src/", "res/", and "test/", and their subdirectories to .o object files
-$(OBJDIR)/%.o: %.s
+# Compile .c files in "res/" to .o object files
+$(OBJDIR)/%.o:	$(RESDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+# Compile .c files in "test/" to .o object files
+$(OBJDIR)/%.o:	$(TESTDIR)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+# Compile .s assembly files in "src/" to .o object files
+$(OBJDIR)/%.o:	$(SRCDIR)/%.s
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
 # If needed, compile .c files in "src/" to .s assembly files
@@ -81,10 +86,10 @@ $(BINS): $(OBJS)
 
 # Link the compiled test and src object files into a test.gb ROM file
 $(TESTS): $(TOBJS) $(OBJS)
-	$(LCC) $(LCCFLAGS) -o $(TESTS) $(TOBJS) $(filter-out $(OBJDIR)/src/main.o, $(OBJS))
+	$(LCC) $(LCCFLAGS) -o $(TESTS) $(TOBJS) $(filter-out $(OBJDIR)/main.o, $(OBJS))
 
 clean:
-	rm -rf  $(OBJDIR)/
+	rm -f  $(OBJDIR)/*.*
 
 run: all
 	$(EMULATOR) $(OBJDIR)/$(PROJECTNAME).gb

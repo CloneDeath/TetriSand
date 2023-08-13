@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../engine/tile_set.h"
+#include "tile_set.h"
 
 typedef struct text_area_struct {
     uint8_t x;

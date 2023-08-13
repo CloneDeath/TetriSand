@@ -3,9 +3,9 @@
 #include "sand_chain.h"
 #include "sand_chain_list.h"
 
-#include "../ui/ui_lines.h"
-#include "../engine/tile_set.h"
-#include "../engine/bitmap_area.h"
+#include "ui_lines.h"
+#include "tile_set.h"
+#include "bitmap_area.h"
 
 #include <stdbool.h>
 #include <stdint.h>

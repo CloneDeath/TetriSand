@@ -1,6 +1,6 @@
 #pragma once
 #include "stdlib.h"
-#include "../gameplay/sand_chain.h"
+#include "sand_chain.h"
 
 /******* CLASS *******/
 

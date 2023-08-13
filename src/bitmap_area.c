@@ -3,7 +3,7 @@
 #include "bitmap_area.h"
 #include "allocate.h"
 
-#include "../../res/TILES_blank.h"
+#include "../res/TILES_blank.h"
 
 #include <stdbool.h>
 #include <stdio.h>
