@@ -30,7 +30,7 @@ LCCFLAGS += -autobank -Wb-ext=.rel
 # -Wf--debug : Enable Debug
 # -Wl-y : Enable CDB file generation for debugging
 # -Wl-w -Wl-m : Enable "wide maps" for Emulicious (to get variable names)
-LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m -O0
+LCCFLAGS += -Wf--debug -Wl-y -Wl-w -Wl-m
 
 LCCFLAGS += -DSKIP_FIND_FAMILIES
 #LCCFLAGS += -DSKIP_SLIDE_SAND

@@ -87,15 +87,9 @@ static inline void _slide_sand_chain(sand_zone* this, uint8_t x, uint8_t new_x) 
 static inline void _detect_empty_and_similar_chains(sand_zone* this) {
     uint8_t width = this->width * 8;
     for (uint8_t x = 0; x < width; x++) {
-        sand_chain* current = &this->sand_chains[x];
-        while (current->next != NULL) {
-            sand_chain *next = current->next;
-
-            if (next->length == 0) {
-                printf("DETECTED INVALID CHAIN");
-                exit(-1);
-                continue;
-            }
+        sand_chain* current = this->sand_chains[x].next;
+        while (current != NULL) {
+            assert(current->length > 0);
             current = current->next;
         }
     }
