@@ -51,9 +51,11 @@ void run_game() {
     sand_zone* sand_zone = sand_zone__new(1, 1, 10, 16, lines);
     piece_master* pm = piece_master__new(sand_zone);
 
+    sand_zone__add_sand(sand_zone, 0, 0, 10, 3);
+
     while (true) {
         sand_zone__update_sand(sand_zone);
-        piece_master__update(pm);
+        // piece_master__update(pm);
         if (pm->game_over) {
             ui_game_over__show(game_over);
             break;
@@ -79,7 +81,7 @@ int main(void) {
     SHOW_SPRITES;
     SPRITES_8x8;
 
-    show_title();
+    //show_title();
 
     initrand(DIV_REG);
 
