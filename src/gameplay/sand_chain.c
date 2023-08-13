@@ -85,22 +85,15 @@ uint8_t sand_chain__get_connected_length(sand_chain* this) {
 
 sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t length) {
     // find first chain to excise from
-    sand_chain* prev_chain = this;
-    sand_chain* first_chain = this->next;
+    sand_chain* first_chain = this;
     while (first_chain != NULL) {
-        if (first_chain->y <= from && first_chain->y + first_chain->length > from) {
-            break;
-        }
-        prev_chain = first_chain;
+        if (first_chain->y <= from && first_chain->y + first_chain->length > from) break;
         first_chain = first_chain->next;
     }
 
     uint8_t split_after = from - first_chain->y;
     sand_chain* split_chain = _split(first_chain, split_after);
     sand_chain* current = split_chain;
-    if (split_after == 0) {
-        first_chain = prev_chain;
-    }
 
     uint8_t total = current->length;
     while (total < length) {
