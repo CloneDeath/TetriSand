@@ -10,8 +10,10 @@
 
 /******* PRIVATE INSTANCE *******/
 
-sand_chain* _split(sand_chain* this, uint8_t split_after) {
+sand_chain* _split(sand_chain* this, uint8_t split_after, sand_chain* prev) {
     if (split_after == 0) {
+        assert(prev != NULL);
+        prev->next = NULL;
         return this;
     }
     sand_chain* next = sand_chain__new(this->y + split_after, this->length - split_after, this->value);
@@ -85,14 +87,16 @@ uint8_t sand_chain__get_connected_length(sand_chain* this) {
 
 sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t length) {
     // find first chain to excise from
+    sand_chain* prev_chain = NULL;
     sand_chain* first_chain = this;
     while (first_chain != NULL) {
         if (first_chain->y <= from && first_chain->y + first_chain->length > from) break;
+        prev_chain = first_chain;
         first_chain = first_chain->next;
     }
 
     uint8_t split_after = from - first_chain->y;
-    sand_chain* split_chain = _split(first_chain, split_after);
+    sand_chain* split_chain = _split(first_chain, split_after, prev_chain);
     sand_chain* current = split_chain;
 
     uint8_t total = current->length;
@@ -103,7 +107,7 @@ sand_chain* sand_chain__excise_chain(sand_chain* this, uint8_t from, uint8_t len
     }
     if (total > length) {
         uint8_t extra_length = total - length;
-        sand_chain* split_last = _split(current, current->length - extra_length);
+        sand_chain* split_last = _split(current, current->length - extra_length, NULL);
         first_chain->next = split_last;
         return split_chain;
     } else {
